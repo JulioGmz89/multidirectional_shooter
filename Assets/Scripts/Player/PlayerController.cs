@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 lookInput;
     private float nextFireTime;
+    private bool isFiring;
 
     private void Awake()
     {
@@ -59,21 +60,12 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>
     /// Called by the PlayerInput component when the Fire action is triggered.
+    /// Updates the firing state based on whether the button is pressed or released.
     /// </summary>
-    public void OnFire()
+    /// <param name="value">The input value from the action.</param>
+    public void OnFire(InputValue value)
     {
-        // Check if enough time has passed to fire again.
-        if (Time.time >= nextFireTime)
-        {
-            // Instantiate the projectile at the fire point's position and rotation.
-            if (projectilePrefab != null && firePoint != null)
-            {
-                Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
-
-                // Calculate the time of the next allowed shot.
-                nextFireTime = Time.time + 1f / fireRate;
-            }
-        }
+        isFiring = value.isPressed;
     }
 
     private void FixedUpdate()
@@ -87,8 +79,9 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = Vector2.ClampMagnitude(rb.linearVelocity, maxSpeed);
         }
 
-        // Handle rotation
+        // Handle rotation and firing
         HandleRotation();
+        HandleFiring();
     }
 
 #if UNITY_EDITOR
@@ -101,6 +94,18 @@ public class PlayerController : MonoBehaviour
         rb.linearDamping = linearDrag;
     }
 #endif
+
+    private void HandleFiring()
+    {
+        if (isFiring && Time.time >= nextFireTime)
+        {
+            if (projectilePrefab != null && firePoint != null)
+            {
+                Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                nextFireTime = Time.time + 1f / fireRate;
+            }
+        }
+    }
 
     private void HandleRotation()
     {
