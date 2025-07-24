@@ -8,8 +8,12 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
-    [Tooltip("The movement speed of the player ship in units per second.")]
-    [SerializeField] private float moveSpeed = 5f;
+    [Tooltip("The force applied to the ship to make it accelerate.")]
+    [SerializeField] private float acceleration = 50f;
+    [Tooltip("The maximum speed the ship can reach.")]
+    [SerializeField] private float maxSpeed = 10f;
+    [Tooltip("The drag applied to the ship to make it decelerate.")]
+    [SerializeField] private float linearDrag = 2.5f;
 
     [Header("Weapon Settings")]
     [Tooltip("The projectile prefab to be fired.")]
@@ -30,6 +34,7 @@ public class PlayerController : MonoBehaviour
         // Get the Rigidbody2D component attached to this GameObject.
         // We use Awake to ensure the reference is set before any other script tries to access it.
         rb = GetComponent<Rigidbody2D>();
+        rb.linearDamping = linearDrag;
         mainCamera = Camera.main;
     }
 
@@ -73,10 +78,29 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Apply physics-based movement and rotation in FixedUpdate for consistency.
-        rb.linearVelocity = moveInput * moveSpeed;
+        // Apply force for movement
+        rb.AddForce(moveInput * acceleration);
+
+        // Clamp velocity to max speed
+        if (rb.linearVelocity.magnitude > maxSpeed)
+        {
+            rb.linearVelocity = Vector2.ClampMagnitude(rb.linearVelocity, maxSpeed);
+        }
+
+        // Handle rotation
         HandleRotation();
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (rb == null)
+        {
+            rb = GetComponent<Rigidbody2D>();
+        }
+        rb.linearDamping = linearDrag;
+    }
+#endif
 
     private void HandleRotation()
     {
