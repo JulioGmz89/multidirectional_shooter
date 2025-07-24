@@ -12,13 +12,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
 
     private Rigidbody2D rb;
+    private Camera mainCamera;
     private Vector2 moveInput;
+    private Vector2 lookInput;
 
     private void Awake()
     {
         // Get the Rigidbody2D component attached to this GameObject.
         // We use Awake to ensure the reference is set before any other script tries to access it.
         rb = GetComponent<Rigidbody2D>();
+        mainCamera = Camera.main;
     }
 
     /// <summary>
@@ -31,10 +34,44 @@ public class PlayerController : MonoBehaviour
         moveInput = value.Get<Vector2>();
     }
 
+    /// <summary>
+    /// Called by the PlayerInput component when the Look action is triggered.
+    /// </summary>
+    /// <param name="value">The input value from the action.</param>
+    public void OnLook(InputValue value)
+    {
+        lookInput = value.Get<Vector2>();
+    }
+
     private void FixedUpdate()
     {
-        // Apply physics-based movement in FixedUpdate for consistency.
-        // This ensures the movement speed is not tied to the frame rate.
+        // Apply physics-based movement and rotation in FixedUpdate for consistency.
         rb.linearVelocity = moveInput * moveSpeed;
+        HandleRotation();
+    }
+
+    private void HandleRotation()
+    {
+        Vector2 aimDirection;
+        // Check if the current control scheme is Gamepad
+        if (GetComponent<PlayerInput>().currentControlScheme == "Gamepad")
+        {
+            // Use the raw look input as the direction vector for gamepad
+            aimDirection = lookInput;
+        }
+        else
+        {
+            // For Mouse, convert screen position to world position
+            Vector2 mousePosition = mainCamera.ScreenToWorldPoint(lookInput);
+            aimDirection = (mousePosition - (Vector2)transform.position).normalized;
+        }
+
+        // Only rotate if there is significant input
+        if (aimDirection.sqrMagnitude > 0.1f)
+        {
+            // Calculate the angle and set the rotation of the Rigidbody
+            float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg - 90f;
+            rb.rotation = angle;
+        }
     }
 }
