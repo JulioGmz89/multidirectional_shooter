@@ -45,6 +45,11 @@ public class PlayerController : MonoBehaviour
     /// <param name="value">The input value from the action.</param>
     public void OnMove(InputValue value)
     {
+        if (GameStateManager.Instance.CurrentState != GameState.Gameplay) 
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
         // Read the Vector2 value from the input action and normalize it.
         moveInput = value.Get<Vector2>();
     }
@@ -55,6 +60,7 @@ public class PlayerController : MonoBehaviour
     /// <param name="value">The input value from the action.</param>
     public void OnLook(InputValue value)
     {
+        if (GameStateManager.Instance.CurrentState != GameState.Gameplay) return;
         lookInput = value.Get<Vector2>();
     }
 
@@ -65,11 +71,33 @@ public class PlayerController : MonoBehaviour
     /// <param name="value">The input value from the action.</param>
     public void OnFire(InputValue value)
     {
+        if (GameStateManager.Instance.CurrentState != GameState.Gameplay) return;
         isFiring = value.isPressed;
+    }
+
+    /// <summary>
+    /// Called by the PlayerInput component when the Pause action is triggered.
+    /// </summary>
+    public void OnPause()
+    {
+        if (GameStateManager.Instance.CurrentState == GameState.Gameplay)
+        {
+            GameStateManager.Instance.ChangeState(GameState.Pause);
+        }
+        else if (GameStateManager.Instance.CurrentState == GameState.Pause)
+        {
+            GameStateManager.Instance.ChangeState(GameState.Gameplay);
+        }
     }
 
     private void FixedUpdate()
     {
+        // Do not process movement/rotation if the game is not in the Gameplay state
+        if (GameStateManager.Instance.CurrentState != GameState.Gameplay)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
         // Apply force for movement
         rb.AddForce(moveInput * acceleration);
 
