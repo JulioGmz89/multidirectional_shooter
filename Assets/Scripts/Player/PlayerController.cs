@@ -11,6 +11,12 @@ public class PlayerController : MonoBehaviour
     [Tooltip("The movement speed of the player ship in units per second.")]
     [SerializeField] private float moveSpeed = 5f;
 
+    [Header("Weapon Settings")]
+    [Tooltip("The projectile prefab to be fired.")]
+    [SerializeField] private GameObject projectilePrefab;
+    [Tooltip("The point from which projectiles are fired.")]
+    [SerializeField] private Transform firePoint;
+
     private Rigidbody2D rb;
     private Camera mainCamera;
     private Vector2 moveInput;
@@ -41,6 +47,18 @@ public class PlayerController : MonoBehaviour
     public void OnLook(InputValue value)
     {
         lookInput = value.Get<Vector2>();
+    }
+
+    /// <summary>
+    /// Called by the PlayerInput component when the Fire action is triggered.
+    /// </summary>
+    public void OnFire()
+    {
+        // Instantiate the projectile at the fire point's position and rotation.
+        if (projectilePrefab != null && firePoint != null)
+        {
+            Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        }
     }
 
     private void FixedUpdate()
