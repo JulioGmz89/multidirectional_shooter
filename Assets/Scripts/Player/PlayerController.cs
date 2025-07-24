@@ -16,11 +16,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject projectilePrefab;
     [Tooltip("The point from which projectiles are fired.")]
     [SerializeField] private Transform firePoint;
+    [Tooltip("The number of shots the player can fire per second.")]
+    [SerializeField] private float fireRate = 5f;
 
     private Rigidbody2D rb;
     private Camera mainCamera;
     private Vector2 moveInput;
     private Vector2 lookInput;
+    private float nextFireTime;
 
     private void Awake()
     {
@@ -54,10 +57,17 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void OnFire()
     {
-        // Instantiate the projectile at the fire point's position and rotation.
-        if (projectilePrefab != null && firePoint != null)
+        // Check if enough time has passed to fire again.
+        if (Time.time >= nextFireTime)
         {
-            Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+            // Instantiate the projectile at the fire point's position and rotation.
+            if (projectilePrefab != null && firePoint != null)
+            {
+                Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+
+                // Calculate the time of the next allowed shot.
+                nextFireTime = Time.time + 1f / fireRate;
+            }
         }
     }
 
