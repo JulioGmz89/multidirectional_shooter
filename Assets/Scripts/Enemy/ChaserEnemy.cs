@@ -12,10 +12,28 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
 
     private Rigidbody2D rb;
     private Transform playerTransform;
+    private Health health;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        health = GetComponent<Health>();
+    }
+
+    private void OnEnable()
+    {
+        if (health != null)
+        {
+            health.OnDeath += Defeat;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (health != null)
+        {
+            health.OnDeath -= Defeat;
+        }
     }
 
     /// <summary>
@@ -56,10 +74,16 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // For now, the enemy is defeated if it hits a player's projectile.
-        if (collision.gameObject.CompareTag("PlayerProjectile"))
+        // If the enemy collides with the player, deal damage to the player.
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Defeat();
+            Health playerHealth = collision.gameObject.GetComponent<Health>();
+            DamageDealer damageDealer = GetComponent<DamageDealer>();
+
+            if (playerHealth != null && damageDealer != null)
+            {
+                playerHealth.TakeDamage(damageDealer.GetDamage());
+            }
         }
     }
 

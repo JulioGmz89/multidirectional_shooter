@@ -29,6 +29,25 @@ public class PlayerController : MonoBehaviour
     private Vector2 lookInput;
     private float nextFireTime;
     private bool isFiring;
+    private Health health;
+
+    private void OnEnable()
+    {
+        GameStateManager.OnStateChanged += HandleGameStateChange;
+        if (health != null)
+        {
+            health.OnDeath += Die;
+        }
+    }
+
+    private void OnDisable()
+    {
+        GameStateManager.OnStateChanged -= HandleGameStateChange;
+        if (health != null)
+        {
+            health.OnDeath -= Die;
+        }
+    }
 
     private void Awake()
     {
@@ -37,19 +56,27 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         rb.linearDamping = linearDrag;
         mainCamera = Camera.main;
+        health = GetComponent<Health>();
     }
 
     /// <summary>
     /// Called by the PlayerInput component when the Move action is triggered.
     /// </summary>
     /// <param name="value">The input value from the action.</param>
+    private void HandleGameStateChange(GameState newState)
+    {
+        if (newState != GameState.Gameplay)
+        {
+            // Stop all movement and input when not in gameplay
+            moveInput = Vector2.zero;
+            isFiring = false;
+            rb.linearVelocity = Vector2.zero;
+        }
+    }
+
     public void OnMove(InputValue value)
     {
-        if (GameStateManager.Instance.CurrentState != GameState.Gameplay) 
-        {
-            moveInput = Vector2.zero;
-            return;
-        }
+        if (GameStateManager.Instance.CurrentState != GameState.Gameplay) return;
         // Read the Vector2 value from the input action and normalize it.
         moveInput = value.Get<Vector2>();
     }
@@ -122,6 +149,14 @@ public class PlayerController : MonoBehaviour
         rb.linearDamping = linearDrag;
     }
 #endif
+
+    private void Die()
+    {
+        // Transition to the Defeat state when the player dies.
+        GameStateManager.Instance.ChangeState(GameState.Defeat);
+        // Disable the player object.
+        gameObject.SetActive(false);
+    }
 
     private void HandleFiring()
     {

@@ -37,7 +37,17 @@ public class Projectile : MonoBehaviour, IPooledObject
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // Cancel the invoke in case the projectile hits something before its lifetime expires
+        // Try to find a Health component on the object we collided with.
+        Health health = collision.gameObject.GetComponent<Health>();
+        DamageDealer damageDealer = GetComponent<DamageDealer>();
+
+        // If the object has health and this projectile has a damage dealer, deal damage.
+        if (health != null && damageDealer != null)
+        {
+            health.TakeDamage(damageDealer.GetDamage());
+        }
+
+        // Cancel the timed return and return to the pool immediately after any collision.
         CancelInvoke(nameof(ReturnToPool));
         ReturnToPool();
     }
