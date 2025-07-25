@@ -12,5 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3367a97090e61d348aa9893cb83bb600, type: 3}
   m_Name: Wave_01
   m_EditorClassIdentifier: 
-  enemyGroups: []
+  enemyGroups:
+  - enemyPrefab: {fileID: 6894754587006279500, guid: 3de41205f354c1549a57f8183599722c, type: 3}
+    count: 5
+    spawnInterval: 1
   timeToNextWave: 5

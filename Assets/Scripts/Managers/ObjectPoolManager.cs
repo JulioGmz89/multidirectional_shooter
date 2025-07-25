@@ -39,10 +39,8 @@ public class ObjectPoolManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-    }
 
-    private void Start()
-    {
+        // Initialize the pool dictionary
         poolDictionary = new Dictionary<string, Queue<GameObject>>();
 
         foreach (Pool pool in pools)
@@ -58,6 +56,11 @@ public class ObjectPoolManager : MonoBehaviour
 
             poolDictionary.Add(pool.tag, objectPool);
         }
+    }
+
+    private void Start()
+    {
+        // Start can be empty now or used for other purposes
     }
 
     /// <summary>
