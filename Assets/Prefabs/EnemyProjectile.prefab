@@ -14,8 +14,8 @@ GameObject:
   - component: {fileID: 3966414170258957228}
   - component: {fileID: 1202100209172047690}
   - component: {fileID: 5858863131518969196}
-  m_Layer: 10
-  m_Name: PlayerProjectile
+  m_Layer: 11
+  m_Name: EnemyProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -130,7 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a3432b704bfda946bf86bec3ec63d46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 25
+  moveSpeed: 10
   lifeTime: 2
 --- !u!58 &1202100209172047690
 CircleCollider2D:

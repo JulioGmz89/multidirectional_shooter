@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Wave_01
   m_EditorClassIdentifier: 
   enemyGroups:
-  - enemyPrefab: {fileID: 6894754587006279500, guid: 3de41205f354c1549a57f8183599722c, type: 3}
-    count: 5
+  - enemyPrefab: {fileID: 1466883078539593735, guid: f9bcdd38356b5ce4e86e7665a82640b7, type: 3}
+    count: 15
+    spawnInterval: 2
+  - enemyPrefab: {fileID: 5759398990497808212, guid: 6368a8782919cff4db51476e5de77e20, type: 3}
+    count: 10
     spawnInterval: 1
   timeToNextWave: 5

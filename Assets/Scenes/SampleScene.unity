@@ -353,9 +353,11 @@ GameObject:
   - component: {fileID: 660059548}
   - component: {fileID: 660059552}
   - component: {fileID: 660059551}
-  m_Layer: 0
+  - component: {fileID: 660059553}
+  - component: {fileID: 660059554}
+  m_Layer: 8
   m_Name: PlayerShip
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -594,6 +596,69 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &660059553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 660059546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72dba664d0a3b4047bf7fc12d54864de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 10
+--- !u!60 &660059554
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 660059546}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.28866667}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0, y: 0.5773587}
+      - {x: -0.5, y: -0.28866667}
+      - {x: 0.5, y: -0.28866667}
+  m_UseDelaunayMesh: 0
 --- !u!1 &817434813
 GameObject:
   m_ObjectHideFlags: 0
@@ -603,7 +668,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 817434814}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -619,7 +684,7 @@ Transform:
   m_GameObject: {fileID: 817434813}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.574, z: 0}
+  m_LocalPosition: {x: 0, y: 0.66, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -713,7 +778,7 @@ GameObject:
   - component: {fileID: 1332113152}
   - component: {fileID: 1332113151}
   m_Layer: 0
-  m_Name: GamePoolManager
+  m_Name: ObjectPoolManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -735,9 +800,15 @@ MonoBehaviour:
   - tag: PlayerProjectile
     prefab: {fileID: 5338362060488451659, guid: 9322a249ec588bd4eb320807f5ce4d15, type: 3}
     size: 20
-  - tag: BasicEnemy
-    prefab: {fileID: 6894754587006279500, guid: 3de41205f354c1549a57f8183599722c, type: 3}
+  - tag: ChaserEnemy
+    prefab: {fileID: 1466883078539593735, guid: f9bcdd38356b5ce4e86e7665a82640b7, type: 3}
+    size: 15
+  - tag: ShooterEnemy
+    prefab: {fileID: 5759398990497808212, guid: 6368a8782919cff4db51476e5de77e20, type: 3}
     size: 10
+  - tag: EnemyProjectile
+    prefab: {fileID: 5338362060488451659, guid: 650cd4cf832684943a7e089c25bf96bd, type: 3}
+    size: 20
 --- !u!4 &1332113152
 Transform:
   m_ObjectHideFlags: 0
