@@ -129,7 +129,7 @@ public class PlayerController : MonoBehaviour
         {
             if (projectilePrefab != null && firePoint != null)
             {
-                Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                ObjectPoolManager.Instance.SpawnFromPool("PlayerProjectile", firePoint.position, firePoint.rotation);
                 nextFireTime = Time.time + 1f / fireRate;
             }
         }
