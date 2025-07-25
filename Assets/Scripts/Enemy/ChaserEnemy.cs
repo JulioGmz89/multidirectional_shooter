@@ -13,11 +13,13 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
     private Rigidbody2D rb;
     private Transform playerTransform;
     private Health health;
+    private PointsOnDeath pointsOnDeath;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
+        pointsOnDeath = GetComponent<PointsOnDeath>();
     }
 
     private void OnEnable()
@@ -92,11 +94,16 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
     /// </summary>
     private void Defeat()
     {
+        // Add points to the score if the component exists.
+        if (pointsOnDeath != null)
+        {
+            ScoreManager.Instance.AddScore(pointsOnDeath.GetPoints());
+        }
+
         // Notify the WaveManager that this enemy is defeated.
         WaveManager.Instance.OnEnemyDefeated();
 
         // Return this object to the pool.
-        // The tag must match the one in the ObjectPoolManager.
         ObjectPoolManager.Instance.ReturnToPool(gameObject.name, gameObject);
     }
 }

@@ -28,11 +28,13 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject
     private Health health;
     private Transform playerTransform;
     private float nextFireTime;
+    private PointsOnDeath pointsOnDeath;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
+        pointsOnDeath = GetComponent<PointsOnDeath>();
     }
 
     private void OnEnable()
@@ -106,6 +108,11 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject
 
     private void Defeat()
     {
+        if (pointsOnDeath != null)
+        {
+            ScoreManager.Instance.AddScore(pointsOnDeath.GetPoints());
+        }
+
         WaveManager.Instance.OnEnemyDefeated();
         ObjectPoolManager.Instance.ReturnToPool(gameObject.name, gameObject);
     }

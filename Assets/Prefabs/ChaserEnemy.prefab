@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8647061554541876100}
   - component: {fileID: -4120273083195593469}
   - component: {fileID: 3843327219747621461}
+  - component: {fileID: 647357825236895675}
   m_Layer: 9
   m_Name: ChaserEnemy
   m_TagString: Untagged
@@ -209,3 +210,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
+--- !u!114 &647357825236895675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1466883078539593735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d539f517c887a6646b997ab170d0a835, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  points: 10
