@@ -31,6 +31,9 @@ public class PlayerController : MonoBehaviour
     private bool isFiring;
     private Health health;
 
+    private float baseFireRate;
+    private Coroutine rapidFireCoroutine;
+
     private void OnEnable()
     {
         GameStateManager.OnStateChanged += HandleGameStateChange;
@@ -57,6 +60,7 @@ public class PlayerController : MonoBehaviour
         rb.linearDamping = linearDrag;
         mainCamera = Camera.main;
         health = GetComponent<Health>();
+        baseFireRate = fireRate;
     }
 
     /// <summary>
@@ -168,6 +172,31 @@ public class PlayerController : MonoBehaviour
                 nextFireTime = Time.time + 1f / fireRate;
             }
         }
+    }
+
+    public void ActivateRapidFire(float multiplier, float duration)
+    {
+        // If a rapid fire power-up is already active, stop the old coroutine.
+        if (rapidFireCoroutine != null)
+        {
+            StopCoroutine(rapidFireCoroutine);
+        }
+
+        // Start a new coroutine for the power-up effect.
+        rapidFireCoroutine = StartCoroutine(RapidFireCoroutine(multiplier, duration));
+    }
+
+    private System.Collections.IEnumerator RapidFireCoroutine(float multiplier, float duration)
+    {
+        // Apply the fire rate multiplier.
+        fireRate *= multiplier;
+
+        // Wait for the specified duration.
+        yield return new WaitForSeconds(duration);
+
+        // Revert the fire rate to the base value.
+        fireRate = baseFireRate;
+        rapidFireCoroutine = null;
     }
 
     private void HandleRotation()
