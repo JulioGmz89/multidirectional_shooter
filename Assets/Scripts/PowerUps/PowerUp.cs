@@ -2,8 +2,8 @@ using UnityEngine;
 
 public enum PowerUpType
 {
-    RapidFire
-    // Future types can be added here, e.g., Shield, SpeedBoost
+    RapidFire,
+    Shield
 }
 
 /// <summary>
@@ -35,6 +35,9 @@ public class PowerUp : MonoBehaviour
                 {
                     case PowerUpType.RapidFire:
                         playerController.ActivateRapidFire(fireRateMultiplier, duration);
+                        break;
+                    case PowerUpType.Shield:
+                        playerController.ActivateShield();
                         break;
                 }
 

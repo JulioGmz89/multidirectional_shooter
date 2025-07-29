@@ -23,6 +23,10 @@ public class PlayerController : MonoBehaviour
     [Tooltip("The number of shots the player can fire per second.")]
     [SerializeField] private float fireRate = 5f;
 
+    [Header("Visuals")]
+    [Tooltip("The GameObject representing the player's shield.")]
+    [SerializeField] private GameObject shieldVisual;
+
     private Rigidbody2D rb;
     private Camera mainCamera;
     private Vector2 moveInput;
@@ -40,6 +44,7 @@ public class PlayerController : MonoBehaviour
         if (health != null)
         {
             health.OnDeath += Die;
+            health.OnShieldBroken += DeactivateShieldVisual;
         }
     }
 
@@ -49,6 +54,7 @@ public class PlayerController : MonoBehaviour
         if (health != null)
         {
             health.OnDeath -= Die;
+            health.OnShieldBroken -= DeactivateShieldVisual;
         }
     }
 
@@ -61,6 +67,9 @@ public class PlayerController : MonoBehaviour
         mainCamera = Camera.main;
         health = GetComponent<Health>();
         baseFireRate = fireRate;
+
+        // Ensure the shield is disabled on awake.
+        if (shieldVisual != null) shieldVisual.SetActive(false);
     }
 
     /// <summary>
@@ -184,6 +193,17 @@ public class PlayerController : MonoBehaviour
 
         // Start a new coroutine for the power-up effect.
         rapidFireCoroutine = StartCoroutine(RapidFireCoroutine(multiplier, duration));
+    }
+
+    public void ActivateShield()
+    {
+        if (health != null) health.ActivateShield();
+        if (shieldVisual != null) shieldVisual.SetActive(true);
+    }
+
+    private void DeactivateShieldVisual()
+    {
+        if (shieldVisual != null) shieldVisual.SetActive(false);
     }
 
     private System.Collections.IEnumerator RapidFireCoroutine(float multiplier, float duration)
