@@ -6,6 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class Projectile : MonoBehaviour, IPooledObject
 {
+    // IPooledObject implementation
+    public string PoolTag { get; set; }
     [Header("Projectile Settings")]
     [Tooltip("The speed at which the projectile travels.")]
     [SerializeField] private float moveSpeed = 20f;
@@ -23,20 +25,40 @@ public class Projectile : MonoBehaviour, IPooledObject
     /// </summary>
     public void OnObjectSpawn()
     {
-        // Set the velocity of the projectile to move it forward.
-        rb.linearVelocity = transform.up * moveSpeed;
         // Automatically return the projectile to the pool after its lifetime expires.
         Invoke(nameof(ReturnToPool), lifeTime);
     }
 
+    /// <summary>
+    /// Sets the projectile's velocity, overriding any inherited velocity.
+    /// </summary>
+    /// <param name="direction">The direction the projectile should travel in.</param>
+    public void SetVelocity(Vector2 direction)
+    {
+        rb.linearVelocity = direction * moveSpeed;
+    }
+
     private void ReturnToPool()
     {
-        // The tag must match the one set in the ObjectPoolManager inspector
-        ObjectPoolManager.Instance.ReturnToPool("PlayerProjectile", gameObject);
+        if (string.IsNullOrEmpty(PoolTag))
+        {
+            Debug.LogError($"PoolTag not set on {gameObject.name}. Cannot return to pool.");
+            Destroy(gameObject); // Fallback to destroying the object
+            return;
+        }
+        ObjectPoolManager.Instance.ReturnToPool(PoolTag, gameObject);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // If this is a player's projectile, do not process collisions with the player.
+        if (gameObject.CompareTag("PlayerProjectile") && collision.gameObject.CompareTag("Player"))
+        {
+            // We don't return to the pool here, allowing the projectile to continue its path.
+            // This prevents projectiles from disappearing if the player runs into them.
+            return;
+        }
+
         // Try to find a Health component on the object we collided with.
         Health health = collision.gameObject.GetComponent<Health>();
         DamageDealer damageDealer = GetComponent<DamageDealer>();
@@ -44,7 +66,7 @@ public class Projectile : MonoBehaviour, IPooledObject
         // If the object has health and this projectile has a damage dealer, deal damage.
         if (health != null && damageDealer != null)
         {
-            health.TakeDamage(damageDealer.GetDamage());
+            health.TakeDamage(damageDealer.GetDamage(), gameObject);
         }
 
         // Cancel the timed return and return to the pool immediately after any collision.

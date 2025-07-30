@@ -6,6 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class ChaserEnemy : MonoBehaviour, IPooledObject
 {
+    public string PoolTag { get; set; }
     [Header("Chaser Settings")]
     [Tooltip("The speed at which the enemy moves towards the player.")]
     [SerializeField] private float moveSpeed = 3f;
@@ -84,7 +85,7 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
 
             if (playerHealth != null && damageDealer != null)
             {
-                playerHealth.TakeDamage(damageDealer.GetDamage());
+                playerHealth.TakeDamage(damageDealer.GetDamage(), gameObject);
             }
         }
     }

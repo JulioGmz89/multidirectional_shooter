@@ -177,7 +177,12 @@ public class PlayerController : MonoBehaviour
         {
             if (projectilePrefab != null && firePoint != null)
             {
-                ObjectPoolManager.Instance.SpawnFromPool("PlayerProjectile", firePoint.position, firePoint.rotation);
+                GameObject projectileGO = ObjectPoolManager.Instance.SpawnFromPool("PlayerProjectile", firePoint.position, firePoint.rotation);
+                Projectile projectile = projectileGO.GetComponent<Projectile>();
+                if (projectile != null)
+                {
+                    projectile.SetVelocity(firePoint.up);
+                }
                 nextFireTime = Time.time + 1f / fireRate;
             }
         }

@@ -10,12 +10,14 @@ public class Health : MonoBehaviour
     [Tooltip("The maximum health of the object.")]
     [SerializeField] private int maxHealth = 10;
 
+    [Tooltip("The current health of the object.")]
+    [SerializeField] private int currentHealth;
+    
     // Event invoked when health reaches zero.
     public event Action OnDeath;
     // Event invoked when the shield breaks.
     public event Action OnShieldBroken;
 
-    private int currentHealth;
     private bool isShielded;
 
     private void OnEnable()
@@ -34,7 +36,7 @@ public class Health : MonoBehaviour
         isShielded = true;
     }
 
-    public void TakeDamage(int damageAmount)
+    public void TakeDamage(int damageAmount, GameObject attacker)
     {
         // If shielded, absorb the damage and break the shield.
         if (isShielded)
@@ -45,6 +47,9 @@ public class Health : MonoBehaviour
         }
 
         if (currentHealth <= 0) return; // Already dead
+
+        // --- DEBUG LOG ---
+        Debug.Log($"{gameObject.name} took {damageAmount} damage from {attacker.name} (Tag: {attacker.tag})");
 
         currentHealth -= damageAmount;
         // Debug.Log($"{gameObject.name} took {damageAmount} damage, has {currentHealth} health left.");

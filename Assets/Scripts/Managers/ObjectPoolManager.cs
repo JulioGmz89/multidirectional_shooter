@@ -6,6 +6,7 @@ using UnityEngine;
 /// </summary>
 public interface IPooledObject
 {
+    string PoolTag { get; set; }
     void OnObjectSpawn();
 }
 
@@ -107,6 +108,7 @@ public class ObjectPoolManager : MonoBehaviour
         IPooledObject pooledObj = objectToSpawn.GetComponent<IPooledObject>();
         if (pooledObj != null)
         {
+            pooledObj.PoolTag = tag; // Assign the tag before spawning
             pooledObj.OnObjectSpawn();
         }
 

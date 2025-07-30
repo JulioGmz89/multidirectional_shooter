@@ -17,8 +17,8 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private Transform[] spawnPoints;
 
     private int currentWaveIndex = 0;
-    private int enemiesLeftToSpawn;
     private int enemiesAlive;
+    private bool waveIsSpawning;
 
     private void Awake()
     {
@@ -60,21 +60,21 @@ public class WaveManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("All waves completed!");
-            // Potentially transition to a Victory state
-            // GameStateManager.Instance.ChangeState(GameState.Victory);
+            // All waves have been successfully cleared.
+            Debug.Log("All waves completed! Player wins!");
+            GameStateManager.Instance.ChangeState(GameState.Victory);
         }
     }
 
     private IEnumerator SpawnWave(Wave_SO wave)
     {
         Debug.Log($"Starting Wave {currentWaveIndex + 1}");
-        enemiesLeftToSpawn = 0;
+        waveIsSpawning = true;
+        enemiesAlive = 0;
         foreach (var group in wave.enemyGroups)
         {
-            enemiesLeftToSpawn += group.count;
+            enemiesAlive += group.count;
         }
-        enemiesAlive = enemiesLeftToSpawn;
 
         foreach (var group in wave.enemyGroups)
         {
@@ -87,13 +87,14 @@ public class WaveManager : MonoBehaviour
                 }
 
                 Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-                // The tag for the pool must match the prefab name or a custom tag scheme
                 string poolTag = group.enemyPrefab.name;
                 ObjectPoolManager.Instance.SpawnFromPool(poolTag, spawnPoint.position, spawnPoint.rotation);
                 
                 yield return new WaitForSeconds(group.spawnInterval);
             }
         }
+
+        waveIsSpawning = false;
     }
 
     /// <summary>
@@ -102,7 +103,9 @@ public class WaveManager : MonoBehaviour
     public void OnEnemyDefeated()
     {
         enemiesAlive--;
-        if (enemiesAlive <= 0 && enemiesLeftToSpawn > 0) // Check if all spawned enemies are defeated
+
+        // Only check for wave completion if spawning is finished and all enemies are defeated.
+        if (!waveIsSpawning && enemiesAlive <= 0)
         {
             Debug.Log("Wave completed!");
             Wave_SO currentWave = waves[currentWaveIndex];

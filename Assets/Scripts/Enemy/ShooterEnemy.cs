@@ -6,6 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
 public class ShooterEnemy : MonoBehaviour, IPooledObject
 {
+    public string PoolTag { get; set; }
     [Header("AI Settings")]
     [Tooltip("The ideal distance to keep from the player.")]
     [SerializeField] private float desiredRange = 8f;
@@ -101,7 +102,13 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject
     {
         if (Time.time >= nextFireTime)
         {
-            ObjectPoolManager.Instance.SpawnFromPool(projectilePoolTag, firePoint.position, firePoint.rotation);
+            GameObject projectileGO = ObjectPoolManager.Instance.SpawnFromPool(projectilePoolTag, firePoint.position, firePoint.rotation);
+            Projectile projectile = projectileGO.GetComponent<Projectile>();
+            if (projectile != null)
+            {
+                // The enemy is already rotated to face the player, so firePoint.up is the correct direction.
+                projectile.SetVelocity(firePoint.up);
+            }
             nextFireTime = Time.time + 1f / fireRate;
         }
     }
