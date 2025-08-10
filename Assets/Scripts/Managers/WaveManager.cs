@@ -5,6 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Manages the spawning of enemy waves based on ScriptableObject definitions.
 /// </summary>
+[DefaultExecutionOrder(-100)]
 public class WaveManager : MonoBehaviour
 {
     public event System.Action<int> OnWaveChanged;
@@ -55,15 +56,17 @@ public class WaveManager : MonoBehaviour
 
     private void StartNextWave()
     {
+        Debug.Log("Attempting to start next wave.");
         if (currentWaveIndex < waves.Count)
         {
+            Debug.Log($"Starting wave {currentWaveIndex + 1} of {waves.Count}.");
             OnWaveChanged?.Invoke(currentWaveIndex + 1);
             StartCoroutine(SpawnWave(waves[currentWaveIndex]));
         }
         else
         {
             // All waves have been successfully cleared.
-            Debug.Log("All waves completed! Player wins!");
+            Debug.LogWarning("All waves completed!");
             GameStateManager.Instance.ChangeState(GameState.Victory);
         }
     }
@@ -77,6 +80,7 @@ public class WaveManager : MonoBehaviour
         {
             enemiesAlive += group.count;
         }
+        Debug.Log($"Wave {currentWaveIndex + 1} has {enemiesAlive} enemies.");
 
         foreach (var group in wave.enemyGroups)
         {
@@ -97,6 +101,16 @@ public class WaveManager : MonoBehaviour
         }
 
         waveIsSpawning = false;
+        Debug.Log($"Wave {currentWaveIndex + 1} has finished spawning.");
+
+        // If all enemies were defeated while the wave was still spawning, trigger completion check.
+        if (enemiesAlive <= 0)
+        {
+            Debug.Log("Wave cleared during spawn. Triggering completion.");
+            // Manually call OnEnemyDefeated to trigger the next wave logic.
+            // It's safe because enemiesAlive is already <= 0.
+            OnEnemyDefeated();
+        }
     }
 
     /// <summary>
@@ -104,13 +118,19 @@ public class WaveManager : MonoBehaviour
     /// </summary>
     public void OnEnemyDefeated()
     {
-        enemiesAlive--;
+        // This check prevents the count from going negative if called manually after wave clear.
+        if (enemiesAlive > 0)
+        {
+            enemiesAlive--;
+        }
 
+        Debug.Log($"Enemy defeated. {enemiesAlive} enemies remaining.");
         // Only check for wave completion if spawning is finished and all enemies are defeated.
         if (!waveIsSpawning && enemiesAlive <= 0)
         {
             Debug.Log("Wave completed!");
             Wave_SO currentWave = waves[currentWaveIndex];
+            Debug.Log("Wave complete. Preparing for next wave.");
             currentWaveIndex++;
             Invoke(nameof(StartNextWave), currentWave.timeToNextWave);
         }

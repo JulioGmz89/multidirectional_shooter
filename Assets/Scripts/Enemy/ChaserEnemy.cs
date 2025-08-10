@@ -105,6 +105,6 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
         WaveManager.Instance.OnEnemyDefeated();
 
         // Return this object to the pool.
-        ObjectPoolManager.Instance.ReturnToPool(gameObject.name, gameObject);
+        ObjectPoolManager.Instance.ReturnToPool(PoolTag, gameObject);
     }
 }

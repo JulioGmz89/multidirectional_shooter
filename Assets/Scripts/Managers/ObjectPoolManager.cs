@@ -105,6 +105,13 @@ public class ObjectPoolManager : MonoBehaviour
         objectToSpawn.transform.position = position;
         objectToSpawn.transform.rotation = rotation;
 
+        // Set the pool tag on the object so it knows how to return itself.
+        IPooledObject pooledObject = objectToSpawn.GetComponent<IPooledObject>();
+        if (pooledObject != null)
+        {
+            pooledObject.PoolTag = tag;
+        }
+
         IPooledObject pooledObj = objectToSpawn.GetComponent<IPooledObject>();
         if (pooledObj != null)
         {
