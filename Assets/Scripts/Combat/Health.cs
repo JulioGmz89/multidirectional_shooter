@@ -16,15 +16,22 @@ public class Health : MonoBehaviour
     // Event invoked when health reaches zero.
     public event Action OnDeath;
     // Event invoked when the shield breaks.
+    public event Action OnShieldActivated;
     public event Action OnShieldBroken;
+    public event Action<int, int> OnHealthChanged;
 
     private bool isShielded;
+
+    public int GetCurrentHealth() => currentHealth;
+    public int GetMaxHealth() => maxHealth;
 
     private void OnEnable()
     {
         // Reset health and shield every time the object is enabled.
         currentHealth = maxHealth;
         isShielded = false;
+        // Invoke event on enable to set initial UI state
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
     /// <summary>
@@ -34,6 +41,7 @@ public class Health : MonoBehaviour
     public void ActivateShield()
     {
         isShielded = true;
+        OnShieldActivated?.Invoke();
     }
 
     public void TakeDamage(int damageAmount, GameObject attacker)
@@ -43,7 +51,7 @@ public class Health : MonoBehaviour
         {
             isShielded = false;
             OnShieldBroken?.Invoke();
-            return;
+            return; // Absorb the damage
         }
 
         if (currentHealth <= 0) return; // Already dead
@@ -52,6 +60,7 @@ public class Health : MonoBehaviour
         Debug.Log($"{gameObject.name} took {damageAmount} damage from {attacker.name} (Tag: {attacker.tag})");
 
         currentHealth -= damageAmount;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
         // Debug.Log($"{gameObject.name} took {damageAmount} damage, has {currentHealth} health left.");
 
         if (currentHealth <= 0)

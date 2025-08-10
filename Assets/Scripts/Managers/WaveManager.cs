@@ -7,6 +7,7 @@ using UnityEngine;
 /// </summary>
 public class WaveManager : MonoBehaviour
 {
+    public event System.Action<int> OnWaveChanged;
     // Singleton instance
     public static WaveManager Instance { get; private set; }
 
@@ -56,6 +57,7 @@ public class WaveManager : MonoBehaviour
     {
         if (currentWaveIndex < waves.Count)
         {
+            OnWaveChanged?.Invoke(currentWaveIndex + 1);
             StartCoroutine(SpawnWave(waves[currentWaveIndex]));
         }
         else
