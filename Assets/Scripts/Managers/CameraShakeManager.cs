@@ -71,7 +71,7 @@ public class CameraShakeManager : MonoBehaviour
             // If not found, search in the scene
             if (cameraShake == null)
             {
-                cameraShake = FindObjectOfType<CameraShake>();
+                cameraShake = FindFirstObjectByType<CameraShake>();
             }
             
             // If still not found, log warning

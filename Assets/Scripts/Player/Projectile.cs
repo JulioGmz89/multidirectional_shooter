@@ -14,10 +14,24 @@ public class Projectile : MonoBehaviour, IPooledObject
     [SerializeField] private float lifeTime = 2f;
 
     private Rigidbody2D rb;
+    private TrailRendererController trailController;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        SetupTrailRenderer();
+    }
+
+    /// <summary>
+    /// Sets up the trail renderer for this projectile based on its tag
+    /// </summary>
+    private void SetupTrailRenderer()
+    {
+        if (TrailManager.Instance != null)
+        {
+            string objectType = gameObject.CompareTag("PlayerProjectile") ? "PlayerProjectile" : "EnemyProjectile";
+            trailController = TrailManager.Instance.SetupTrailForObject(gameObject, objectType);
+        }
     }
 
     /// <summary>
@@ -25,6 +39,12 @@ public class Projectile : MonoBehaviour, IPooledObject
     /// </summary>
     public void OnObjectSpawn()
     {
+        // Initialize trail when spawned from pool
+        if (TrailManager.Instance != null)
+        {
+            TrailManager.Instance.InitializeTrailForPooledObject(gameObject);
+        }
+        
         // Automatically return the projectile to the pool after its lifetime expires.
         Invoke(nameof(ReturnToPool), lifeTime);
     }
@@ -40,6 +60,12 @@ public class Projectile : MonoBehaviour, IPooledObject
 
     private void ReturnToPool()
     {
+        // Clean up trail before returning to pool
+        if (TrailManager.Instance != null)
+        {
+            TrailManager.Instance.CleanupTrailForPooledObject(gameObject);
+        }
+        
         if (string.IsNullOrEmpty(PoolTag))
         {
             Debug.LogError($"PoolTag not set on {gameObject.name}. Cannot return to pool.");

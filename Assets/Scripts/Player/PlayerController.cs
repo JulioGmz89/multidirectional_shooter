@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviour
     [Header("Visuals")]
     [Tooltip("The GameObject representing the player's shield.")]
     [SerializeField] private GameObject shieldVisual;
+    [Tooltip("Enable trail renderer for the player ship")]
+    [SerializeField] private bool enableTrail = true;
 
     private Rigidbody2D rb;
     private Camera mainCamera;
@@ -34,6 +36,7 @@ public class PlayerController : MonoBehaviour
     private float nextFireTime;
     private bool isFiring;
     private Health health;
+    private TrailRendererController trailController;
 
     private float baseFireRate;
     private Coroutine rapidFireCoroutine;
@@ -68,6 +71,12 @@ public class PlayerController : MonoBehaviour
         health = GetComponent<Health>();
         baseFireRate = fireRate;
 
+        // Setup trail renderer for the player ship
+        if (enableTrail && TrailManager.Instance != null)
+        {
+            trailController = TrailManager.Instance.SetupTrailForObject(gameObject, "PlayerShip");
+        }
+
         // Ensure the shield is disabled on awake.
         if (shieldVisual != null) shieldVisual.SetActive(false);
     }
@@ -84,6 +93,20 @@ public class PlayerController : MonoBehaviour
             moveInput = Vector2.zero;
             isFiring = false;
             rb.linearVelocity = Vector2.zero;
+            
+            // Disable trail when not in gameplay
+            if (trailController != null)
+            {
+                trailController.SetTrailEnabled(false);
+            }
+        }
+        else
+        {
+            // Re-enable trail when entering gameplay
+            if (trailController != null && enableTrail)
+            {
+                trailController.SetTrailEnabled(true);
+            }
         }
     }
 
