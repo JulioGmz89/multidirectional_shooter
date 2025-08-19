@@ -115,6 +115,12 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject
 
     private void Defeat()
     {
+        // Trigger camera shake for enemy death
+        if (CameraShakeManager.Instance != null)
+        {
+            CameraShakeManager.Instance.TriggerEnemyDeathShake();
+        }
+        
         if (pointsOnDeath != null)
         {
             ScoreManager.Instance.AddScore(pointsOnDeath.GetPoints());

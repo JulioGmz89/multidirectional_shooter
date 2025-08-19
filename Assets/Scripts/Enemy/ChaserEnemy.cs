@@ -95,6 +95,12 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
     /// </summary>
     private void Defeat()
     {
+        // Trigger camera shake for enemy death
+        if (CameraShakeManager.Instance != null)
+        {
+            CameraShakeManager.Instance.TriggerEnemyDeathShake();
+        }
+        
         // Add points to the score if the component exists.
         if (pointsOnDeath != null)
         {

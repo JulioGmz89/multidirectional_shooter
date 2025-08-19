@@ -165,6 +165,12 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
+        // Trigger camera shake for player death
+        if (CameraShakeManager.Instance != null)
+        {
+            CameraShakeManager.Instance.TriggerPlayerDeathShake();
+        }
+        
         // Transition to the Defeat state when the player dies.
         GameStateManager.Instance.ChangeState(GameState.Defeat);
         // Disable the player object.

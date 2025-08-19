@@ -61,7 +61,12 @@ public class Health : MonoBehaviour
 
         currentHealth -= damageAmount;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        // Debug.Log($"{gameObject.name} took {damageAmount} damage, has {currentHealth} health left.");
+        
+        // Trigger camera shake for player damage
+        if (gameObject.CompareTag("Player") && CameraShakeManager.Instance != null)
+        {
+            CameraShakeManager.Instance.TriggerPlayerDamageShake();
+        }
 
         if (currentHealth <= 0)
         {
