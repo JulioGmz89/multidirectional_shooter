@@ -24,6 +24,11 @@ public class CameraShake : MonoBehaviour
     private Coroutine shakeCoroutine;
     private Camera cameraComponent;
 
+    /// <summary>
+    /// Returns true if camera shake is currently active.
+    /// </summary>
+    public bool IsShaking => shakeCoroutine != null;
+
     private void Awake()
     {
         cameraComponent = GetComponent<Camera>();
@@ -156,6 +161,21 @@ public class CameraShake : MonoBehaviour
         {
             originalPosition = transform.localPosition;
         }
+        else
+        {
+            // During active shake, calculate the new original position by removing current shake offset
+            Vector3 currentShakeOffset = transform.localPosition - originalPosition;
+            originalPosition = transform.localPosition - currentShakeOffset;
+        }
+    }
+
+    /// <summary>
+    /// Forces an update of the original position, even during active shake.
+    /// Use this when the camera's base position changes during shake events.
+    /// </summary>
+    public void ForceUpdateOriginalPosition(Vector3 newBasePosition)
+    {
+        originalPosition = newBasePosition;
     }
 
     private void OnValidate()
