@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using ProjectMayhem.Audio;
 
 /// <summary>
 /// Manages player movement and input.
@@ -48,6 +49,10 @@ public class PlayerController : MonoBehaviour
         {
             health.OnDeath += Die;
             health.OnShieldBroken += DeactivateShieldVisual;
+        }
+        if (GameStateManager.Instance != null && GameStateManager.Instance.CurrentState == GameState.Gameplay)
+        {
+            SFX.Play(AudioEvent.PlayerSpawn);
         }
     }
 
@@ -188,6 +193,7 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
+        SFX.Play(AudioEvent.PlayerDeath);
         // Trigger camera shake for player death
         if (CameraShakeManager.Instance != null)
         {
@@ -212,6 +218,7 @@ public class PlayerController : MonoBehaviour
                 {
                     projectile.SetVelocity(firePoint.up);
                 }
+                SFX.Play(AudioEvent.PlayerShoot);
                 nextFireTime = Time.time + 1f / fireRate;
             }
         }
@@ -227,6 +234,7 @@ public class PlayerController : MonoBehaviour
 
         // Start a new coroutine for the power-up effect.
         rapidFireCoroutine = StartCoroutine(RapidFireCoroutine(multiplier, duration));
+        SFX.Play(AudioEvent.PowerUpActivate, transform.position);
     }
 
     public void ActivateShield()

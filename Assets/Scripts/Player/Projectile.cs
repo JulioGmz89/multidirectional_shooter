@@ -1,4 +1,5 @@
 using UnityEngine;
+using ProjectMayhem.Audio;
 
 /// <summary>
 /// Manages the behavior of a projectile.
@@ -94,6 +95,9 @@ public class Projectile : MonoBehaviour, IPooledObject
         {
             health.TakeDamage(damageDealer.GetDamage(), gameObject);
         }
+
+        // Play a small explosion/impact at the collision point
+        SFX.Play(AudioEvent.ExplosionSmall, transform.position);
 
         // Cancel the timed return and return to the pool immediately after any collision.
         CancelInvoke(nameof(ReturnToPool));

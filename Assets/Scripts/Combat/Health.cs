@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using ProjectMayhem.Audio;
 
 /// <summary>
 /// Manages the health of a game object and handles taking damage.
@@ -42,6 +43,7 @@ public class Health : MonoBehaviour
     {
         isShielded = true;
         OnShieldActivated?.Invoke();
+        SFX.Play(AudioEvent.PowerUpActivate, transform.position);
     }
 
     public void TakeDamage(int damageAmount, GameObject attacker)
@@ -51,6 +53,11 @@ public class Health : MonoBehaviour
         {
             isShielded = false;
             OnShieldBroken?.Invoke();
+            // Play a shield break / hit feedback (use player hit for simplicity)
+            if (gameObject.CompareTag("Player"))
+            {
+                SFX.Play(AudioEvent.PlayerHit, transform.position);
+            }
             return; // Absorb the damage
         }
 
@@ -61,6 +68,16 @@ public class Health : MonoBehaviour
 
         currentHealth -= damageAmount;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        
+        // Play hit feedback for player/enemy when taking damage
+        if (gameObject.CompareTag("Player"))
+        {
+            SFX.Play(AudioEvent.PlayerHit, transform.position);
+        }
+        else
+        {
+            SFX.Play(AudioEvent.EnemyHit, transform.position);
+        }
         
         // Trigger camera shake for player damage
         if (gameObject.CompareTag("Player") && CameraShakeManager.Instance != null)

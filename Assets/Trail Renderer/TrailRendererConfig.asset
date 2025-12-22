@@ -88,11 +88,11 @@ MonoBehaviour:
         m_ColorSpace: -1
         m_NumColorKeys: 2
         m_NumAlphaKeys: 2
-      trailMaterial: {fileID: 2100000, guid: 13b8d38daaec9204bb46d90f1eee5c15, type: 2}
+      trailMaterial: {fileID: 2100000, guid: 775defa555425414fb3f02836408fc8d, type: 2}
       enabledByDefault: 1
       minVelocityThreshold: 0.1
       sortingLayerName: Default
-      orderInLayer: -1
+      orderInLayer: 0
   - objectType: EnemyProjectile
     trailSettings:
       startWidth: 0.5
@@ -128,8 +128,8 @@ MonoBehaviour:
         m_ColorSpace: -1
         m_NumColorKeys: 2
         m_NumAlphaKeys: 2
-      trailMaterial: {fileID: 2100000, guid: 69d4f7a9bda44964cbfa5a28a8ee223b, type: 2}
+      trailMaterial: {fileID: 2100000, guid: 775defa555425414fb3f02836408fc8d, type: 2}
       enabledByDefault: 1
       minVelocityThreshold: 0.1
       sortingLayerName: Default
-      orderInLayer: -1
+      orderInLayer: 0

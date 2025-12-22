@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ProjectMayhem.Audio;
 
 /// <summary>
 /// Manages the spawning of enemy waves based on ScriptableObject definitions.
@@ -74,6 +75,7 @@ public class WaveManager : MonoBehaviour
     private IEnumerator SpawnWave(Wave_SO wave)
     {
         Debug.Log($"Starting Wave {currentWaveIndex + 1}");
+        SFX.Play(AudioEvent.WaveStart);
         waveIsSpawning = true;
         enemiesAlive = 0;
         foreach (var group in wave.enemyGroups)
@@ -129,6 +131,7 @@ public class WaveManager : MonoBehaviour
         if (!waveIsSpawning && enemiesAlive <= 0)
         {
             Debug.Log("Wave completed!");
+            SFX.Play(AudioEvent.WaveComplete);
             Wave_SO currentWave = waves[currentWaveIndex];
             Debug.Log("Wave complete. Preparing for next wave.");
             currentWaveIndex++;

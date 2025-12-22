@@ -1,4 +1,5 @@
 using UnityEngine;
+using ProjectMayhem.Audio;
 
 public enum PowerUpType
 {
@@ -22,6 +23,12 @@ public class PowerUp : MonoBehaviour
     [Tooltip("The multiplier to apply to the player's fire rate.")]
     [SerializeField] private float fireRateMultiplier = 2f;
 
+    private void OnEnable()
+    {
+        // Play a spawn sound when the power-up appears
+        SFX.Play(AudioEvent.PickupSpawn, transform.position);
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         // Check if the object that entered the trigger is the player.
@@ -40,6 +47,9 @@ public class PowerUp : MonoBehaviour
                         playerController.ActivateShield();
                         break;
                 }
+
+                // Play collect sound
+                SFX.Play(AudioEvent.PickupCollect, transform.position);
 
                 // Destroy the power-up object after collection.
                 Destroy(gameObject);

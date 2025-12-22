@@ -1,4 +1,5 @@
 using UnityEngine;
+using ProjectMayhem.Audio;
 
 /// <summary>
 /// Controls a simple enemy that moves directly towards the player.
@@ -57,6 +58,7 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
                 Debug.LogError("ChaserEnemy: Could not find GameObject with 'Player' tag.", this);
             }
         }
+        SFX.Play(AudioEvent.EnemySpawn, transform.position);
     }
 
     private void FixedUpdate()
@@ -95,6 +97,7 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
     /// </summary>
     private void Defeat()
     {
+        SFX.Play(AudioEvent.EnemyDeath, transform.position);
         // Trigger camera shake for enemy death
         if (CameraShakeManager.Instance != null)
         {

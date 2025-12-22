@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using ProjectMayhem.Audio;
 
 /// <summary>
 /// Defines the possible states of the game.
@@ -36,6 +37,7 @@ public class GameStateManager : MonoBehaviour
 
     // Current state property
     public GameState CurrentState { get; private set; }
+    private GameState previousState;
 
     private void Awake()
     {
@@ -74,7 +76,9 @@ public class GameStateManager : MonoBehaviour
     {
         if (newState == CurrentState) return;
 
+        previousState = CurrentState;
         CurrentState = newState;
+
 #if UNITY_EDITOR
         debug_SetState = CurrentState;
 #endif
@@ -114,6 +118,8 @@ public class GameStateManager : MonoBehaviour
     private void HandleGameplay()
     {
         Time.timeScale = 1f; // Ensure time is running for gameplay
+        if (AudioManager.Instance != null) AudioManager.Instance.UnpauseAll();
+        if (previousState == GameState.Pause) { SFX.Play(AudioEvent.UI_PauseClose); }
         // Future logic: Load game scene, hide menus, enable player input, etc.
         Debug.Log("Game State changed to: Gameplay");
     }
@@ -121,6 +127,8 @@ public class GameStateManager : MonoBehaviour
     private void HandlePause()
     {
         Time.timeScale = 0f; // Pause the game
+        if (AudioManager.Instance != null) AudioManager.Instance.PauseAll();
+        SFX.Play(AudioEvent.UI_PauseOpen);
         // Future logic: Show pause menu UI, etc.
         Debug.Log("Game State changed to: Pause");
     }
@@ -135,6 +143,8 @@ public class GameStateManager : MonoBehaviour
     private void HandleDefeat()
     {
         Time.timeScale = 0f; // Or 1f
+        if (AudioManager.Instance != null) AudioManager.Instance.PauseAll();
+        SFX.Play(AudioEvent.GameOver);
         // Future logic: Show defeat screen, offer retry, etc.
         Debug.Log("Game State changed to: Defeat");
     }

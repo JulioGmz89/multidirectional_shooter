@@ -1,4 +1,5 @@
 using UnityEngine;
+using ProjectMayhem.Audio;
 
 /// <summary>
 /// Controls an enemy that attempts to maintain a specific range from the player and fire projectiles.
@@ -58,6 +59,7 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject
                 playerTransform = playerObject.transform;
             }
         }
+        SFX.Play(AudioEvent.EnemySpawn, transform.position);
     }
 
     private void FixedUpdate()
@@ -109,12 +111,14 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject
                 // The enemy is already rotated to face the player, so firePoint.up is the correct direction.
                 projectile.SetVelocity(firePoint.up);
             }
+            SFX.Play(AudioEvent.EnemyShoot, transform.position);
             nextFireTime = Time.time + 1f / fireRate;
         }
     }
 
     private void Defeat()
     {
+        SFX.Play(AudioEvent.EnemyDeath, transform.position);
         // Trigger camera shake for enemy death
         if (CameraShakeManager.Instance != null)
         {
