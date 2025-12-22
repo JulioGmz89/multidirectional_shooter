@@ -30,13 +30,14 @@ public class WaveManager : MonoBehaviour
     [Tooltip("The component that provides wave data. Must implement IWaveProvider.")]
     [SerializeField] private MonoBehaviour waveProviderComponent;
 
-    [Header("Spawn Configuration")]
-    [Tooltip("Use SpawnZoneManager for spawn locations. If false or unavailable, uses legacy spawn points.")]
-    [SerializeField] private bool useSpawnZones = true;
-
-    [Header("Legacy Spawn Points (Fallback)")]
-    [Tooltip("Fallback spawn points if SpawnZoneManager is not available.")]
-    [SerializeField] private Transform[] legacySpawnPoints;
+    // Legacy spawn system - kept for backwards compatibility but hidden from Inspector
+    // The new system uses SpawnZoneManager exclusively
+    private bool useSpawnZones = true;
+    
+    // [Header("Legacy Spawn Points (Fallback)")]
+    // [Tooltip("Fallback spawn points if SpawnZoneManager is not available.")]
+    // [SerializeField] private Transform[] legacySpawnPoints;
+    private Transform[] legacySpawnPoints; // Hidden - use SpawnZoneManager instead
 
     // Wave provider interface
     private IWaveProvider waveProvider;
