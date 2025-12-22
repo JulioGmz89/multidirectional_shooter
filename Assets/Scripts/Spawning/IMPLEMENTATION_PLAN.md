@@ -318,29 +318,67 @@ public class PowerUpSpawner : MonoBehaviour
         public string poolTag;
         public float weight;
         public int minWave;
+        public bool enabled;
     }
     
-    public void TrySpawnPowerUp(float chance);
-    public void SpawnPowerUpAt(Vector2 position);
-    public void SpawnRandomPowerUp();
+    // Spawn methods
+    public bool TrySpawnPowerUp(float chance, SpawnTrigger trigger);
+    public bool SpawnRandomPowerUp(SpawnTrigger trigger);
+    public bool SpawnPowerUpAt(string poolTag, Vector2 position, SpawnTrigger trigger);
     
-    private string SelectRandomPowerUp();
+    // Event callbacks
+    public void OnEnemyKilled(float overrideChance = -1f);
+    public void OnWaveComplete(bool spawnGuaranteed = false);
+    
+    // Configuration
+    public int CurrentWaveNumber { get; set; }
+    public int ActivePowerUpCount { get; }
+    public bool CanSpawn { get; }
 }
 ```
 
-### 4.2 Integration Points
+### 4.2 PowerUpTracker Helper Component
+
+Automatically tracks power-up lifetime and notifies spawner when removed.
+
+```csharp
+// PowerUpTracker.cs (included in PowerUpSpawner.cs)
+public class PowerUpTracker : MonoBehaviour
+{
+    private PowerUpSpawner spawner;
+    public void Initialize(PowerUpSpawner powerUpSpawner);
+    // Auto-notifies on OnDisable/OnDestroy
+}
+```
+
+### 4.3 Custom Editor
+
+Visual editor with:
+- Weight distribution chart
+- Wave preview selector
+- Runtime stats display
+- Play mode testing buttons
+
+### 4.4 Integration Points
 
 Power-ups spawn when:
-- Wave is completed (guaranteed)
-- Enemy is killed (chance-based)
-- Player health is low (director decision)
-- Time threshold reached without power-up
+- Wave is completed (chance-based or guaranteed)
+- Enemy is killed (chance-based, configurable per wave)
+- Manual spawn trigger
 
-### Files to Create:
-- [ ] `Assets/Scripts/Spawning/PowerUpSpawner.cs`
-- [ ] Modify `WaveManager.cs` to call PowerUpSpawner on wave complete
+WaveManager integration:
+- Syncs wave number with PowerUpSpawner on wave start
+- Calls `OnEnemyKilled()` in `OnEnemyDefeated()`
+- Calls `OnWaveComplete()` in `CompleteWave()`
+
+### Files Created:
+- [x] `Assets/Scripts/Spawning/PowerUpSpawner.cs` ✅ COMPLETED
+- [x] `Assets/Scripts/Editor/PowerUpSpawnerEditor.cs` ✅ COMPLETED
+- [x] `Assets/Scripts/Managers/WaveManager.cs` (Modified) ✅ COMPLETED
 
 ### Estimated Effort: 1-2 hours
+
+### ✅ PHASE 4 COMPLETE
 
 ---
 
@@ -356,28 +394,48 @@ public class WaveDirector : MonoBehaviour
 {
     public static WaveDirector Instance { get; private set; }
     
+    public enum IntensityPhase { BuildUp, Peak, Sustain, Relax }
+    
     [Header("References")]
-    [SerializeField] private Health playerHealth;
+    [SerializeField] private Health playerHealth; // Auto-found if not set
     
     [Header("Intensity Settings")]
-    [SerializeField] private float peakIntensityDuration = 30f;
-    [SerializeField] private float restDuration = 10f;
+    [SerializeField] private float peakDuration = 30f;
+    [SerializeField] private float relaxDuration = 8f;
+    [SerializeField] private float minTimeBetweenBreathers = 45f;
     
-    // State tracking
-    private float timeSinceLastKill;
-    private float timeSinceLastDamage;
-    private float currentIntensity;
-    private int recentKillCount;
+    [Header("Kill Tracking")]
+    [SerializeField] private float killTrackingWindow = 10f;
+    [SerializeField] private int rapidKillThreshold = 10;
+    [SerializeField] private float killDroughtThreshold = 15f;
+    
+    [Header("Health Thresholds")]
+    [SerializeField] private float lowHealthThreshold = 0.3f;
+    [SerializeField] private float criticalHealthThreshold = 0.15f;
+    
+    [Header("Difficulty Modifiers")]
+    [SerializeField] private float highPerformanceMultiplier = 1.2f;
+    [SerializeField] private float lowPerformanceMultiplier = 0.7f;
+    [SerializeField] private float lowHealthPowerUpBonus = 0.2f;
+    [SerializeField] private float criticalHealthPowerUpBonus = 0.4f;
     
     // Public queries for other systems
     public float GetDifficultyMultiplier();
     public float GetPowerUpChanceBonus();
+    public float GetSpawnIntervalMultiplier();
     public bool ShouldTriggerBreather();
     public bool ShouldSpawnHelpPowerUp();
     
+    // Event callbacks
+    public void OnEnemyKilled();
+    public void OnPlayerDamaged();
+    
     // Events
-    public event System.Action OnBreatherStart;
+    public event System.Action<float> OnBreatherStart;
     public event System.Action OnBreatherEnd;
+    public event System.Action<IntensityPhase> OnPhaseChanged;
+    public event System.Action OnPlayerLowHealth;
+    public event System.Action OnPlayerRecovered;
 }
 ```
 
@@ -385,15 +443,44 @@ public class WaveDirector : MonoBehaviour
 
 | Condition | Action |
 |-----------|--------|
-| Player health < 30% | Increase power-up spawn chance |
-| No kills in 15 seconds | Reduce spawn rate temporarily |
+| Player health < 30% | Increase power-up spawn chance (+20%) |
+| Player health < 15% | Increase power-up spawn chance (+40%), spawn help power-up |
+| No kills in 15 seconds | Reduce spawn interval, add power-up bonus |
 | 10+ kills in 10 seconds | Trigger "breather" moment |
 | Wave taking too long | Spawn helpful power-up |
+| Peak phase > 30s | Transition to sustain or relax |
+| Relax phase | Slow spawn intervals (1.5x) |
 
-### Files to Create:
-- [ ] `Assets/Scripts/Spawning/WaveDirector.cs`
+### 5.3 Intensity Phases
+
+- **BuildUp**: Ramping up intensity (0.3 → 0.7 over 15s)
+- **Peak**: Maximum intensity (1.0), fast spawns
+- **Sustain**: Maintaining moderate intensity (0.7)
+- **Relax**: Breather/rest period (0.2), slow spawns
+
+### 5.4 WaveManager Integration
+
+- `OnEnemyDefeated()` notifies director and adds power-up bonus from director
+- Spawn interval multiplied by director's `GetSpawnIntervalMultiplier()`
+- Director auto-subscribes to WaveManager events
+
+### 5.5 Custom Editor
+
+Visual editor with:
+- Real-time intensity phase display
+- Intensity/health bars
+- Status indicators (Low HP, Critical, Wave Long)
+- Current modifiers display
+- Testing buttons (Simulate Kill, Simulate Damage, Reset)
+
+### Files Created:
+- [x] `Assets/Scripts/Spawning/WaveDirector.cs` ✅ COMPLETED
+- [x] `Assets/Scripts/Editor/WaveDirectorEditor.cs` ✅ COMPLETED
+- [x] `Assets/Scripts/Managers/WaveManager.cs` (Modified) ✅ COMPLETED
 
 ### Estimated Effort: 2-3 hours
+
+### ✅ PHASE 5 COMPLETE
 
 ---
 

@@ -209,6 +209,12 @@ public class WaveManager : MonoBehaviour
         Debug.Log($"WaveManager: Starting {currentWave}");
         OnWaveChanged?.Invoke(currentWave.waveNumber);
 
+        // Sync wave number with PowerUpSpawner
+        if (PowerUpSpawner.Instance != null)
+        {
+            PowerUpSpawner.Instance.CurrentWaveNumber = currentWave.waveNumber;
+        }
+
         spawnCoroutine = StartCoroutine(SpawnWaveCoroutine(currentWave));
     }
 
@@ -243,7 +249,13 @@ public class WaveManager : MonoBehaviour
                 // Wait between spawns (except after the last one)
                 if (i < group.count - 1)
                 {
-                    yield return new WaitForSeconds(group.spawnInterval);
+                    // Apply director spawn interval modifier if available
+                    float interval = group.spawnInterval;
+                    if (WaveDirector.Instance != null)
+                    {
+                        interval *= WaveDirector.Instance.GetSpawnIntervalMultiplier();
+                    }
+                    yield return new WaitForSeconds(interval);
                 }
             }
         }
@@ -294,11 +306,20 @@ public class WaveManager : MonoBehaviour
 
         Debug.Log($"WaveManager: Enemy defeated. {enemiesAlive} remaining.");
 
-        // TODO: Integrate with PowerUpSpawner for chance-based spawns
-        // if (currentWave != null && Random.value < currentWave.powerUpChanceOnKill)
-        // {
-        //     PowerUpSpawner.Instance?.SpawnRandomPowerUp();
-        // }
+        // Notify WaveDirector of the kill
+        if (WaveDirector.Instance != null)
+        {
+            WaveDirector.Instance.OnEnemyKilled();
+        }
+
+        // Integrate with PowerUpSpawner for chance-based spawns
+        if (PowerUpSpawner.Instance != null)
+        {
+            float baseChance = currentWave?.powerUpChanceOnKill ?? 0f;
+            // Add director bonus if available
+            float directorBonus = WaveDirector.Instance?.GetPowerUpChanceBonus() ?? 0f;
+            PowerUpSpawner.Instance.OnEnemyKilled(baseChance + directorBonus);
+        }
 
         // Check for wave completion
         if (!waveIsSpawning && enemiesAlive <= 0)
@@ -320,11 +341,12 @@ public class WaveManager : MonoBehaviour
 
         OnWaveCompleted?.Invoke(completedWaveNumber);
 
-        // TODO: Spawn power-up on wave complete
-        // if (currentWave?.spawnPowerUpOnComplete == true)
-        // {
-        //     PowerUpSpawner.Instance?.SpawnRandomPowerUp();
-        // }
+        // Spawn power-up on wave complete if configured
+        if (PowerUpSpawner.Instance != null)
+        {
+            bool guaranteed = currentWave?.spawnPowerUpOnComplete ?? false;
+            PowerUpSpawner.Instance.OnWaveComplete(guaranteed);
+        }
 
         // Schedule next wave
         Invoke(nameof(StartNextWave), timeToNextWave);
