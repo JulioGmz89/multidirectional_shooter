@@ -184,12 +184,14 @@ public class WaveManager : MonoBehaviour
 ```
 
 ### Files to Create/Modify:
-- [ ] `Assets/Scripts/Spawning/RuntimeWaveData.cs`
-- [ ] `Assets/Scripts/Spawning/IWaveProvider.cs`
-- [ ] `Assets/Scripts/Spawning/CampaignWaveProvider.cs`
-- [ ] `Assets/Scripts/Managers/WaveManager.cs` (Modify)
+- [x] `Assets/Scripts/Spawning/RuntimeWaveData.cs` ✅ COMPLETED
+- [x] `Assets/Scripts/Spawning/IWaveProvider.cs` ✅ COMPLETED
+- [x] `Assets/Scripts/Spawning/CampaignWaveProvider.cs` ✅ COMPLETED
+- [x] `Assets/Scripts/Managers/WaveManager.cs` (Modified) ✅ COMPLETED
 
 ### Estimated Effort: 2-3 hours
+
+### ✅ PHASE 2 COMPLETE
 
 ---
 
