@@ -71,6 +71,7 @@ public class PlayerController : MonoBehaviour
         // Get the Rigidbody2D component attached to this GameObject.
         // We use Awake to ensure the reference is set before any other script tries to access it.
         rb = GetComponent<Rigidbody2D>();
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         rb.linearDamping = linearDrag;
         mainCamera = Camera.main;
         health = GetComponent<Health>();
@@ -187,6 +188,7 @@ public class PlayerController : MonoBehaviour
         {
             rb = GetComponent<Rigidbody2D>();
         }
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         rb.linearDamping = linearDrag;
     }
 #endif

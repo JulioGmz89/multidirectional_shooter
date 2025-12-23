@@ -18,27 +18,25 @@ public class CameraShake : MonoBehaviour
     [Range(0.1f, 1f)]
     [SerializeField] private float shakeSmoothness = 0.9f;
 
-    private Vector3 originalPosition;
     private float currentShakeIntensity;
     private float currentShakeDuration;
     private Coroutine shakeCoroutine;
-    private Camera cameraComponent;
+    private Vector3 currentOffset;
 
     /// <summary>
     /// Returns true if camera shake is currently active.
     /// </summary>
     public bool IsShaking => shakeCoroutine != null;
 
+    /// <summary>
+    /// Current shake offset to apply additively to the camera's base position.
+    /// The follow system should add this to its computed camera position.
+    /// </summary>
+    public Vector3 CurrentOffset => currentOffset;
+
     private void Awake()
     {
-        cameraComponent = GetComponent<Camera>();
-        if (cameraComponent == null)
-        {
-            Debug.LogError("CameraShake: No Camera component found on this GameObject!", this);
-        }
-        
-        // Store the original position
-        originalPosition = transform.localPosition;
+        currentOffset = Vector3.zero;
     }
 
     /// <summary>
@@ -111,7 +109,7 @@ public class CameraShake : MonoBehaviour
         
         currentShakeIntensity = 0f;
         currentShakeDuration = 0f;
-        transform.localPosition = originalPosition;
+        currentOffset = Vector3.zero;
     }
 
     private IEnumerator ShakeCoroutine()
@@ -125,57 +123,47 @@ public class CameraShake : MonoBehaviour
             float decayFactor = 1f - (normalizedTime * normalizedTime); // Quadratic decay for smooth falloff
             float currentIntensity = currentShakeIntensity * decayFactor * maxShakeIntensity;
             
-            // Generate random shake offset
-            Vector3 shakeOffset = new Vector3(
+            // Generate random shake offset (2D)
+            Vector3 targetOffset = new Vector3(
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f),
                 0f
             ) * currentIntensity;
-            
-            // Apply smooth interpolation to reduce jitter
-            Vector3 targetPosition = originalPosition + shakeOffset;
-            transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, shakeSmoothness);
+
+            // Smooth the offset to avoid harsh jitter
+            currentOffset = Vector3.Lerp(currentOffset, targetOffset, shakeSmoothness);
             
             elapsedTime += Time.deltaTime;
             yield return null;
         }
         
-        // Smoothly return to original position
-        while (Vector3.Distance(transform.localPosition, originalPosition) > 0.01f)
+        // Smoothly return offset to zero
+        while (currentOffset.sqrMagnitude > 0.0001f)
         {
-            transform.localPosition = Vector3.Lerp(transform.localPosition, originalPosition, shakeSmoothness);
+            currentOffset = Vector3.Lerp(currentOffset, Vector3.zero, shakeSmoothness);
             yield return null;
         }
-        
-        // Ensure exact position reset
-        transform.localPosition = originalPosition;
+
+        currentOffset = Vector3.zero;
         shakeCoroutine = null;
     }
 
     /// <summary>
-    /// Updates the original position reference. Call this if the camera's base position changes.
+    /// Backwards-compatible no-op.
+    /// Shake is now additive; the follow camera owns the base position.
     /// </summary>
     public void UpdateOriginalPosition()
     {
-        if (shakeCoroutine == null)
-        {
-            originalPosition = transform.localPosition;
-        }
-        else
-        {
-            // During active shake, calculate the new original position by removing current shake offset
-            Vector3 currentShakeOffset = transform.localPosition - originalPosition;
-            originalPosition = transform.localPosition - currentShakeOffset;
-        }
+        // Intentionally empty.
     }
 
     /// <summary>
-    /// Forces an update of the original position, even during active shake.
-    /// Use this when the camera's base position changes during shake events.
+    /// Backwards-compatible no-op.
+    /// Shake is now additive; the follow camera owns the base position.
     /// </summary>
     public void ForceUpdateOriginalPosition(Vector3 newBasePosition)
     {
-        originalPosition = newBasePosition;
+        // Intentionally empty.
     }
 
     private void OnValidate()

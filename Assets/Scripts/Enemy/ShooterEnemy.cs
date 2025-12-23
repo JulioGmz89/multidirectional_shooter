@@ -35,6 +35,7 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         health = GetComponent<Health>();
         pointsOnDeath = GetComponent<PointsOnDeath>();
     }

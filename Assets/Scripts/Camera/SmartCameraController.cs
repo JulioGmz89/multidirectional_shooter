@@ -28,6 +28,7 @@ public class SmartCameraController : MonoBehaviour
     private CameraShake cameraShake;
     private Vector3 targetPosition;
     private Vector3 currentVelocity;
+    private Vector3 baseCameraPosition;
     private Vector2 lastMouseWorldPosition;
     private bool hasValidMouseInput;
     private float mouseInputTimeout = 0.1f;
@@ -45,6 +46,7 @@ public class SmartCameraController : MonoBehaviour
         
         // Initialize target position to current camera position
         targetPosition = transform.localPosition;
+        baseCameraPosition = targetPosition;
         
         // Find player if not assigned
         if (autoFindPlayer && playerTransform == null)
@@ -81,6 +83,7 @@ public class SmartCameraController : MonoBehaviour
         initialPos.z = transform.localPosition.z; // Maintain camera's Z position
         transform.localPosition = initialPos;
         targetPosition = initialPos;
+        baseCameraPosition = initialPos;
     }
 
     private void LateUpdate()
@@ -110,12 +113,6 @@ public class SmartCameraController : MonoBehaviour
 
         // Only update during gameplay
         if (GameStateManager.Instance != null && GameStateManager.Instance.CurrentState != GameState.Gameplay)
-        {
-            return;
-        }
-
-        // Pause smart camera updates during active camera shake to prevent conflicts
-        if (cameraShake != null && IsShakeActive())
         {
             return;
         }
@@ -240,8 +237,8 @@ public class SmartCameraController : MonoBehaviour
 
     private void SmoothCameraMovement()
     {
-        // Store previous position to detect movement
-        Vector3 previousPosition = transform.localPosition;
+        // Store previous base position to detect movement
+        Vector3 previousBasePosition = baseCameraPosition;
         
         // Choose appropriate speed based on situation
         float currentSpeed = config.FollowSpeed;
@@ -255,14 +252,20 @@ public class SmartCameraController : MonoBehaviour
             currentSpeed = config.ReturnSpeed;
         }
         
-        // Smooth movement using SmoothDamp for natural feel
-        transform.localPosition = Vector3.SmoothDamp(transform.localPosition, targetPosition, ref currentVelocity, 1f / currentSpeed);
-        
-        // Update CameraShake's original position if camera moved and shake is not active
-        if (cameraShake != null && Vector3.Distance(previousPosition, transform.localPosition) > 0.001f)
+        // Smooth base movement using SmoothDamp for natural feel
+        baseCameraPosition = Vector3.SmoothDamp(baseCameraPosition, targetPosition, ref currentVelocity, 1f / currentSpeed);
+
+        // Apply shake as an additive offset.
+        Vector3 finalPosition = baseCameraPosition;
+        if (cameraShake != null)
         {
-            cameraShake.UpdateOriginalPosition();
+            finalPosition += cameraShake.CurrentOffset;
         }
+
+        transform.localPosition = finalPosition;
+
+        // Keep legacy shake API calls harmless (CameraShake no longer owns base position).
+        _ = previousBasePosition;
     }
 
     private void FindPlayer()
