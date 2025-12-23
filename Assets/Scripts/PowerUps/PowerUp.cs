@@ -1,5 +1,6 @@
 using UnityEngine;
 using ProjectMayhem.Audio;
+using ProjectMayhem.UI.Indicators;
 
 public enum PowerUpType
 {
@@ -10,7 +11,7 @@ public enum PowerUpType
 /// <summary>
 /// Handles the behavior of a collectible power-up.
 /// </summary>
-public class PowerUp : MonoBehaviour
+public class PowerUp : MonoBehaviour, ITrackable
 {
     [Header("Power-up Settings")]
     [Tooltip("The type of this power-up.")]
@@ -23,10 +24,34 @@ public class PowerUp : MonoBehaviour
     [Tooltip("The multiplier to apply to the player's fire rate.")]
     [SerializeField] private float fireRateMultiplier = 2f;
 
+    #region ITrackable Implementation
+    public Transform TrackableTransform => transform;
+    public IndicatorType IndicatorType => powerUpType == PowerUpType.RapidFire 
+        ? IndicatorType.RapidFire 
+        : IndicatorType.Shield;
+    public bool IsTrackingEnabled => gameObject.activeInHierarchy;
+    public int TrackingPriority => 10; // Higher priority than enemies - power-ups are valuable
+    #endregion
+
     private void OnEnable()
     {
         // Play a spawn sound when the power-up appears
         SFX.Play(AudioEvent.PickupSpawn, transform.position);
+
+        // Register with off-screen indicator system
+        if (OffScreenIndicatorManager.Instance != null)
+        {
+            OffScreenIndicatorManager.Instance.RegisterTarget(this);
+        }
+    }
+
+    private void OnDisable()
+    {
+        // Unregister from off-screen indicator system
+        if (OffScreenIndicatorManager.Instance != null)
+        {
+            OffScreenIndicatorManager.Instance.UnregisterTarget(this);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)

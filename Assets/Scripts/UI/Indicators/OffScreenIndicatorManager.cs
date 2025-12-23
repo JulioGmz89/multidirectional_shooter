@@ -300,6 +300,12 @@ namespace ProjectMayhem.UI.Indicators
                     indicatorsToHide.Add(kvp.Key);
                 }
             }
+
+            // Actually remove the hidden indicators from activeIndicators
+            foreach (var target in indicatorsToHide)
+            {
+                activeIndicators.Remove(target);
+            }
         }
 
         private bool IsOnScreen(Vector3 screenPos)
@@ -377,6 +383,22 @@ namespace ProjectMayhem.UI.Indicators
             {
                 if (!indicator.gameObject.activeInHierarchy)
                 {
+                    // Remove this indicator from any existing target mapping
+                    // (it may have been assigned to a target that went on-screen)
+                    ITrackable existingTarget = null;
+                    foreach (var kvp in activeIndicators)
+                    {
+                        if (kvp.Value == indicator)
+                        {
+                            existingTarget = kvp.Key;
+                            break;
+                        }
+                    }
+                    if (existingTarget != null)
+                    {
+                        activeIndicators.Remove(existingTarget);
+                    }
+
                     return indicator;
                 }
             }

@@ -160,7 +160,10 @@ namespace ProjectMayhem.UI.Indicators
             {
                 gameObject.SetActive(true);
                 fadeAlpha = 0f; // Start from invisible for fade-in
-                isVisible = false; // Reset so the state change is recognized
+                targetAlpha = 1f;
+                isVisible = true;
+                UpdateAlpha(); // Immediately apply alpha so it starts invisible
+                return; // State is already set, no need to continue
             }
 
             if (visible == isVisible) return;
