@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b93a56fbe4c603546a651e8467244c9e, type: 3}
   m_Name: ShooterConfig
   m_EditorClassIdentifier: 
-  poolTag: 
-  displayName: 
-  difficultyCost: 10
-  minWaveToAppear: 1
+  poolTag: ShooterEnemy
+  displayName: Shooter
+  difficultyCost: 15
+  minWaveToAppear: 3
   baseWeight: 1
   isBoss: 0
-  maxPerWave: 0
+  maxPerWave: 15
   isUnique: 0
-  spawnIntervalMultiplier: 1
+  spawnIntervalMultiplier: 1.2
   initialSpawnDelay: 0

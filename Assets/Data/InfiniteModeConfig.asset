@@ -16,7 +16,9 @@ MonoBehaviour:
   budgetMultiplierPerWave: 1.15
   flatBudgetIncreasePerWave: 5
   maxBudget: 500
-  availableEnemies: []
+  availableEnemies:
+  - {fileID: 11400000, guid: e8b1b5e923518a74ead32676ff2739fb, type: 2}
+  - {fileID: 11400000, guid: 5de3990681a86fc4dac6ac899d229f63, type: 2}
   minEnemiesPerWave: 3
   maxEnemiesPerWave: 30
   baseSpawnInterval: 1.5

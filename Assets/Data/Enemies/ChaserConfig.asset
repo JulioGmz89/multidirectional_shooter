@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b93a56fbe4c603546a651e8467244c9e, type: 3}
   m_Name: ChaserConfig
   m_EditorClassIdentifier: 
-  poolTag: 
-  displayName: 
-  difficultyCost: 10
+  poolTag: ChaserEnemy
+  displayName: Chasr
+  difficultyCost: 8
   minWaveToAppear: 1
-  baseWeight: 1
+  baseWeight: 2
   isBoss: 0
   maxPerWave: 0
   isUnique: 0
