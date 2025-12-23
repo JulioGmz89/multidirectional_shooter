@@ -20,10 +20,10 @@ MonoBehaviour:
   followSpeed: 8
   lookAheadSpeed: 6
   returnSpeed: 4
-  useBoundaries: 0
+  useBoundaries: 1
   worldBoundaries:
     serializedVersion: 2
-    x: -50
-    y: -50
-    width: 100
-    height: 100
+    x: -35
+    y: -25
+    width: 70
+    height: 50
