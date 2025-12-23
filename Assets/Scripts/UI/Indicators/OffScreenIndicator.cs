@@ -23,7 +23,6 @@ namespace ProjectMayhem.UI.Indicators
         private IndicatorConfig.IndicatorSettings currentSettings;
 
         // Animation state
-        private float pulseTimer;
         private float fadeAlpha = 1f;
         private float targetAlpha = 1f;
         private Vector3 baseScale;
@@ -68,23 +67,44 @@ namespace ProjectMayhem.UI.Indicators
             currentTarget = target;
             currentSettings = config?.GetSettings(target.IndicatorType);
 
+            // Start with default scale from prefab
+            baseScale = Vector3.one;
+
             if (currentSettings != null)
             {
                 // Apply visual settings
                 if (indicatorImage != null)
                 {
+                    // Only change sprite if one is assigned in settings
                     if (currentSettings.sprite != null)
                     {
                         indicatorImage.sprite = currentSettings.sprite;
                     }
-                    indicatorImage.color = currentSettings.color;
+                    
+                    // Apply color, ensuring alpha is visible
+                    Color settingsColor = currentSettings.color;
+                    if (settingsColor.a < 0.01f)
+                    {
+                        settingsColor.a = 1f; // Force visible alpha if accidentally set to 0
+                    }
+                    indicatorImage.color = settingsColor;
                 }
 
-                baseScale = Vector3.one * currentSettings.scale;
+                // Apply scale, ensuring it's not zero
+                float scale = currentSettings.scale;
+                if (scale < 0.1f)
+                {
+                    scale = 1f; // Fallback to default if scale is too small
+                }
+                baseScale = Vector3.one * scale;
+            }
+            else if (indicatorImage != null)
+            {
+                // No settings found - use a default visible color
+                indicatorImage.color = Color.white;
             }
 
             // Reset state
-            pulseTimer = 0f;
             fadeAlpha = 0f;
             targetAlpha = 1f;
             isVisible = true;
@@ -125,16 +145,7 @@ namespace ProjectMayhem.UI.Indicators
                 ? Mathf.Lerp(1f, config.MinDistanceScale, distanceFactor)
                 : 1f;
 
-            // Apply pulse animation if enabled
-            float pulseScale = 1f;
-            if (currentSettings != null && currentSettings.pulseAnimation && config != null)
-            {
-                pulseTimer += Time.deltaTime;
-                float pulseProgress = (Mathf.Sin(pulseTimer * Mathf.PI * 2f / config.PulseDuration) + 1f) / 2f;
-                pulseScale = Mathf.Lerp(config.PulseScaleRange.x, config.PulseScaleRange.y, pulseProgress);
-            }
-
-            rectTransform.localScale = baseScale * distanceScale * pulseScale;
+            rectTransform.localScale = baseScale * distanceScale;
         }
 
         /// <summary>
@@ -144,6 +155,14 @@ namespace ProjectMayhem.UI.Indicators
         /// <param name="visible">Whether the indicator should be visible.</param>
         public void SetVisible(bool visible)
         {
+            // If becoming visible and GameObject is inactive, reactivate it
+            if (visible && !gameObject.activeInHierarchy)
+            {
+                gameObject.SetActive(true);
+                fadeAlpha = 0f; // Start from invisible for fade-in
+                isVisible = false; // Reset so the state change is recognized
+            }
+
             if (visible == isVisible) return;
 
             isVisible = visible;

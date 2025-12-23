@@ -1,13 +1,21 @@
 using UnityEngine;
 using ProjectMayhem.Audio;
+using ProjectMayhem.UI.Indicators;
 
 /// <summary>
 /// Controls an enemy that attempts to maintain a specific range from the player and fire projectiles.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D), typeof(Health))]
-public class ShooterEnemy : MonoBehaviour, IPooledObject
+public class ShooterEnemy : MonoBehaviour, IPooledObject, ITrackable
 {
     public string PoolTag { get; set; }
+
+    #region ITrackable Implementation
+    public Transform TrackableTransform => transform;
+    public IndicatorType IndicatorType => IndicatorType.ShooterEnemy;
+    public bool IsTrackingEnabled => gameObject.activeInHierarchy;
+    public int TrackingPriority => 2; // Higher priority than ChaserEnemy (more dangerous)
+    #endregion
     [Header("AI Settings")]
     [Tooltip("The ideal distance to keep from the player.")]
     [SerializeField] private float desiredRange = 8f;
@@ -43,11 +51,23 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject
     private void OnEnable()
     {
         health.OnDeath += Defeat;
+
+        // Register with off-screen indicator system
+        if (OffScreenIndicatorManager.Instance != null)
+        {
+            OffScreenIndicatorManager.Instance.RegisterTarget(this);
+        }
     }
 
     private void OnDisable()
     {
         health.OnDeath -= Defeat;
+
+        // Unregister from off-screen indicator system
+        if (OffScreenIndicatorManager.Instance != null)
+        {
+            OffScreenIndicatorManager.Instance.UnregisterTarget(this);
+        }
     }
 
     public void OnObjectSpawn()

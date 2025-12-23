@@ -1,13 +1,21 @@
 using UnityEngine;
 using ProjectMayhem.Audio;
+using ProjectMayhem.UI.Indicators;
 
 /// <summary>
 /// Controls a simple enemy that moves directly towards the player.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
-public class ChaserEnemy : MonoBehaviour, IPooledObject
+public class ChaserEnemy : MonoBehaviour, IPooledObject, ITrackable
 {
     public string PoolTag { get; set; }
+
+    #region ITrackable Implementation
+    public Transform TrackableTransform => transform;
+    public IndicatorType IndicatorType => IndicatorType.ChaserEnemy;
+    public bool IsTrackingEnabled => gameObject.activeInHierarchy;
+    public int TrackingPriority => 1;
+    #endregion
     [Header("Chaser Settings")]
     [Tooltip("The speed at which the enemy moves towards the player.")]
     [SerializeField] private float moveSpeed = 3f;
@@ -31,6 +39,12 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
         {
             health.OnDeath += Defeat;
         }
+
+        // Register with off-screen indicator system
+        if (OffScreenIndicatorManager.Instance != null)
+        {
+            OffScreenIndicatorManager.Instance.RegisterTarget(this);
+        }
     }
 
     private void OnDisable()
@@ -38,6 +52,12 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject
         if (health != null)
         {
             health.OnDeath -= Defeat;
+        }
+
+        // Unregister from off-screen indicator system
+        if (OffScreenIndicatorManager.Instance != null)
+        {
+            OffScreenIndicatorManager.Instance.UnregisterTarget(this);
         }
     }
 

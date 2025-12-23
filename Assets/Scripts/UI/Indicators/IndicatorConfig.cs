@@ -17,25 +17,29 @@ namespace ProjectMayhem.UI.Indicators
             [Tooltip("The type of target this setting applies to.")]
             public IndicatorType type;
 
-            [Tooltip("The sprite to display for this indicator type.")]
+            [Tooltip("The sprite to display for this indicator type. If null, uses prefab's default sprite.")]
             public Sprite sprite;
 
             [Tooltip("The color tint for this indicator.")]
-            public Color color = Color.white;
+            public Color color = new Color(1f, 1f, 1f, 1f); // Explicit RGBA to ensure alpha = 1
 
             [Tooltip("Base scale of the indicator (1 = normal size).")]
-            [Range(0.5f, 2f)]
+            [Range(0.05f, 2f)]
             public float scale = 1f;
-
-            [Tooltip("Whether to show distance text below the indicator.")]
-            public bool showDistance;
-
-            [Tooltip("Whether the indicator should pulse to draw attention.")]
-            public bool pulseAnimation = true;
 
             [Tooltip("Distance from screen edge in pixels.")]
             [Range(20f, 100f)]
             public float edgePadding = 50f;
+
+            /// <summary>
+            /// Creates a new IndicatorSettings with safe default values.
+            /// </summary>
+            public IndicatorSettings()
+            {
+                color = Color.white;
+                scale = 1f;
+                edgePadding = 50f;
+            }
         }
 
         [Header("Indicator Types")]
@@ -59,12 +63,6 @@ namespace ProjectMayhem.UI.Indicators
         [SerializeField] private float updateInterval = 0.033f; // ~30fps
 
         [Header("Animation Settings")]
-        [Tooltip("Duration of the pulse animation cycle in seconds.")]
-        [SerializeField] private float pulseDuration = 0.5f;
-
-        [Tooltip("Scale range for pulse animation (min, max).")]
-        [SerializeField] private Vector2 pulseScaleRange = new Vector2(0.95f, 1.05f);
-
         [Tooltip("Duration of fade in/out animations.")]
         [SerializeField] private float fadeDuration = 0.15f;
 
@@ -98,16 +96,6 @@ namespace ProjectMayhem.UI.Indicators
         /// Gets the update interval in seconds.
         /// </summary>
         public float UpdateInterval => updateInterval;
-
-        /// <summary>
-        /// Gets the pulse animation duration.
-        /// </summary>
-        public float PulseDuration => pulseDuration;
-
-        /// <summary>
-        /// Gets the pulse scale range.
-        /// </summary>
-        public Vector2 PulseScaleRange => pulseScaleRange;
 
         /// <summary>
         /// Gets the fade duration.
@@ -153,7 +141,8 @@ namespace ProjectMayhem.UI.Indicators
         /// <returns>The settings for the type, or null if not configured.</returns>
         public IndicatorSettings GetSettings(IndicatorType type)
         {
-            if (settingsCache == null)
+            // Always ensure cache is built - ScriptableObject OnEnable may not be called reliably at runtime
+            if (settingsCache == null || settingsCache.Count == 0)
             {
                 BuildCache();
             }
