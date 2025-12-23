@@ -411,6 +411,13 @@ namespace ProjectMayhem.UI.Indicators
         {
             if (indicatorPrefab == null) return null;
 
+            // Cap pool size to prevent unbounded growth (2x max indicators should be plenty)
+            if (config != null && indicatorPool.Count >= config.MaxIndicators * 2)
+            {
+                Debug.LogWarning("OffScreenIndicatorManager: Pool size cap reached. Consider increasing MaxIndicators.", this);
+                return null;
+            }
+
             GameObject indicatorObj = Instantiate(indicatorPrefab, indicatorContainer);
             indicatorObj.SetActive(false);
 

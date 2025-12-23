@@ -1,8 +1,8 @@
 # Off-Screen Indicator System - Setup Guide
 
-## Phase 1 Implementation Complete ✅
+## Implementation Complete ✅
 
-The core off-screen indicator system has been implemented. This guide explains how to set up the system in your scene.
+The off-screen indicator system has been fully implemented. This guide explains how to set up the system in your scene.
 
 ---
 
@@ -15,6 +15,14 @@ The core off-screen indicator system has been implemented. This guide explains h
 | [IndicatorConfig.cs](IndicatorConfig.cs) | ScriptableObject for configuration |
 | [OffScreenIndicator.cs](OffScreenIndicator.cs) | Individual indicator behavior |
 | [OffScreenIndicatorManager.cs](OffScreenIndicatorManager.cs) | Main singleton manager |
+
+## Integrated Classes
+
+| File | Changes |
+|------|---------|
+| `ChaserEnemy.cs` | Implements ITrackable, auto-registers/unregisters |
+| `ShooterEnemy.cs` | Implements ITrackable, auto-registers/unregisters |
+| `PowerUp.cs` | Implements ITrackable, auto-registers/unregisters |
 
 ---
 
@@ -74,8 +82,6 @@ Indicator Settings (per type):
 ├── Sprite        - The indicator sprite to display
 ├── Color         - Tint color for the indicator
 ├── Scale         - Base size multiplier (1 = normal)
-├── Show Distance - Display distance text (Phase 6)
-├── Pulse Animation - Enable attention-grabbing pulse
 └── Edge Padding  - Pixels from screen edge
 
 Global Settings:
@@ -85,8 +91,6 @@ Global Settings:
 └── Update Interval       - Position update frequency (0.016-0.1s)
 
 Animation Settings:
-├── Pulse Duration        - Pulse cycle time in seconds
-├── Pulse Scale Range     - Min/Max scale during pulse
 └── Fade Duration         - Fade in/out time
 
 Distance Scaling:
@@ -101,8 +105,6 @@ Distance Scaling:
 | Screen Edge Buffer | 0.05 |
 | Max Indicators | 20 |
 | Update Interval | 0.033 (30fps) |
-| Pulse Duration | 0.5 |
-| Pulse Scale Range | (0.95, 1.05) |
 | Fade Duration | 0.15 |
 | Min Distance Scale | 0.7 |
 | Far Distance Threshold | 4 |
@@ -115,20 +117,6 @@ Distance Scaling:
 | Shooter Enemy | Orange | #FF8800 |
 | Rapid Fire | Yellow | #FFDD00 |
 | Shield | Cyan | #00DDFF |
-
----
-
-## Next Steps (Phase 2 & 3)
-
-After setting up the core system, integrate with existing game objects:
-
-### Enemy Integration
-Add `ITrackable` interface to enemy scripts and register/unregister with the manager.
-
-### Power-Up Integration  
-Add `ITrackable` interface to power-up scripts.
-
-See the main proposal document for detailed integration code.
 
 ---
 
