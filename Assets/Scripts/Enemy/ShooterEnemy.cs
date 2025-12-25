@@ -34,6 +34,16 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject, ITrackable
     [Tooltip("The tag used for spawning this enemy's projectile from the object pool.")]
     [SerializeField] private string projectilePoolTag = "EnemyProjectile";
 
+    [Header("Separation Settings")]
+    [Tooltip("How strongly enemies push away from each other.")]
+    [SerializeField] private float separationStrength = 2f;
+    
+    [Tooltip("The radius within which enemies will try to separate from each other.")]
+    [SerializeField] private float separationRadius = 1.5f;
+    
+    [Tooltip("Layer mask for detecting other enemies.")]
+    [SerializeField] private LayerMask enemyLayerMask = -1;
+
     private Rigidbody2D rb;
     private Health health;
     private Transform playerTransform;
@@ -44,6 +54,8 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject, ITrackable
     {
         rb = GetComponent<Rigidbody2D>();
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        // Freeze rotation so projectiles don't spin the enemy
+        rb.freezeRotation = true;
         health = GetComponent<Health>();
         pointsOnDeath = GetComponent<PointsOnDeath>();
     }
@@ -114,11 +126,48 @@ public class ShooterEnemy : MonoBehaviour, IPooledObject, ITrackable
         }
         // else: in range, don't move
 
-        rb.linearVelocity = moveDirection * moveSpeed;
+        // Calculate separation force to avoid stacking with other enemies
+        Vector2 separationForce = CalculateSeparation();
 
-        // Always face the player
+        // Combine movement with separation
+        Vector2 finalVelocity = (moveDirection * moveSpeed) + separationForce;
+        rb.linearVelocity = finalVelocity;
+
+        // Always face the player (not movement direction, since shooter needs to aim)
         float angle = Mathf.Atan2(directionToPlayer.y, directionToPlayer.x) * Mathf.Rad2Deg - 90f;
         rb.rotation = angle;
+    }
+
+    /// <summary>
+    /// Calculates a separation force to push away from nearby enemies.
+    /// </summary>
+    private Vector2 CalculateSeparation()
+    {
+        Vector2 separationForce = Vector2.zero;
+        
+        // Find all nearby enemies
+        Collider2D[] nearbyEnemies = Physics2D.OverlapCircleAll(transform.position, separationRadius, enemyLayerMask);
+        
+        foreach (Collider2D enemyCollider in nearbyEnemies)
+        {
+            // Skip self
+            if (enemyCollider.gameObject == gameObject) continue;
+            
+            // Skip non-enemy objects (in case layer mask catches other things)
+            if (!enemyCollider.CompareTag("Enemy")) continue;
+            
+            Vector2 directionAway = (Vector2)transform.position - (Vector2)enemyCollider.transform.position;
+            float dist = directionAway.magnitude;
+            
+            if (dist > 0f && dist < separationRadius)
+            {
+                // Stronger push when closer (inverse relationship)
+                float strength = (separationRadius - dist) / separationRadius;
+                separationForce += directionAway.normalized * strength * separationStrength;
+            }
+        }
+        
+        return separationForce;
     }
 
     private void HandleFiring()

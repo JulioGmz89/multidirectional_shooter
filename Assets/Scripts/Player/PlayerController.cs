@@ -29,6 +29,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject shieldVisual;
     [Tooltip("Enable trail renderer for the player ship")]
     [SerializeField] private bool enableTrail = true;
+    
+    [Header("Eye Components")]
+    [Tooltip("Reference to the PlayerPupil component that handles aiming.")]
+    [SerializeField] private PlayerPupil pupil;
 
     private Rigidbody2D rb;
     private Camera mainCamera;
@@ -212,13 +216,18 @@ public class PlayerController : MonoBehaviour
     {
         if (isFiring && Time.time >= nextFireTime)
         {
-            if (projectilePrefab != null && firePoint != null)
+            // Use pupil for fire position if available, otherwise fall back to firePoint
+            Vector3 spawnPos = pupil != null ? pupil.FirePointPosition : (firePoint != null ? firePoint.position : transform.position);
+            Quaternion spawnRot = pupil != null ? pupil.FirePointRotation : (firePoint != null ? firePoint.rotation : transform.rotation);
+            Vector2 direction = pupil != null ? pupil.AimDirection : transform.up;
+            
+            if (projectilePrefab != null)
             {
-                GameObject projectileGO = ObjectPoolManager.Instance.SpawnFromPool("PlayerProjectile", firePoint.position, firePoint.rotation);
+                GameObject projectileGO = ObjectPoolManager.Instance.SpawnFromPool("PlayerProjectile", spawnPos, spawnRot);
                 Projectile projectile = projectileGO.GetComponent<Projectile>();
                 if (projectile != null)
                 {
-                    projectile.SetVelocity(firePoint.up);
+                    projectile.SetVelocity(direction);
                 }
                 SFX.Play(AudioEvent.PlayerShoot);
                 nextFireTime = Time.time + 1f / fireRate;
@@ -265,26 +274,8 @@ public class PlayerController : MonoBehaviour
 
     private void HandleRotation()
     {
-        Vector2 aimDirection;
-        // Check if the current control scheme is Gamepad
-        if (GetComponent<PlayerInput>().currentControlScheme == "Gamepad")
-        {
-            // Use the raw look input as the direction vector for gamepad
-            aimDirection = lookInput;
-        }
-        else
-        {
-            // For Mouse, convert screen position to world position
-            Vector2 mousePosition = mainCamera.ScreenToWorldPoint(lookInput);
-            aimDirection = (mousePosition - (Vector2)transform.position).normalized;
-        }
-
-        // Only rotate if there is significant input
-        if (aimDirection.sqrMagnitude > 0.1f)
-        {
-            // Calculate the angle and set the rotation of the Rigidbody
-            float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg - 90f;
-            rb.rotation = angle;
-        }
+        // Rotation is now handled by PlayerPupil component
+        // The player body (eye) no longer rotates - only the pupil moves
+        // This method is kept for potential future use or gamepad rumble feedback
     }
 }

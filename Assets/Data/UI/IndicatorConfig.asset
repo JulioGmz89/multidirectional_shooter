@@ -14,25 +14,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   indicatorSettings:
   - type: 0
-    sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+    sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
     color: {r: 1, g: 0.50628924, b: 0.84331244, a: 0}
-    scale: 0.5
-    showDistance: 0
-    pulseAnimation: 1
+    scale: 0.6
     edgePadding: 40
   - type: 1
     sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
     color: {r: 0.519289, g: 0, b: 1, a: 0}
-    scale: 0.5
-    showDistance: 0
-    pulseAnimation: 1
+    scale: 0.6
+    edgePadding: 40
+  - type: 10
+    sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+    color: {r: 0.9188825, g: 1, b: 0, a: 0}
+    scale: 0.6
+    edgePadding: 40
+  - type: 11
+    sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+    color: {r: 0, g: 1, b: 0.82674193, a: 0}
+    scale: 0.6
     edgePadding: 40
   screenEdgeBuffer: 0.05
   fadeStartDistance: 2
   maxIndicators: 20
-  updateInterval: 0.033
-  pulseDuration: 0.5
-  pulseScaleRange: {x: 0.95, y: 1.05}
+  updateInterval: 0.016
   fadeDuration: 0.15
   minDistanceScale: 0.7
   farDistanceThreshold: 4

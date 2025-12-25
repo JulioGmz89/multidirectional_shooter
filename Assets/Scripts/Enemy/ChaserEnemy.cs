@@ -20,6 +20,16 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject, ITrackable
     [Tooltip("The speed at which the enemy moves towards the player.")]
     [SerializeField] private float moveSpeed = 3f;
 
+    [Header("Separation Settings")]
+    [Tooltip("How strongly enemies push away from each other.")]
+    [SerializeField] private float separationStrength = 2f;
+    
+    [Tooltip("The radius within which enemies will try to separate from each other.")]
+    [SerializeField] private float separationRadius = 1.5f;
+    
+    [Tooltip("Layer mask for detecting other enemies.")]
+    [SerializeField] private LayerMask enemyLayerMask = -1;
+
     private Rigidbody2D rb;
     private Transform playerTransform;
     private Health health;
@@ -29,6 +39,8 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject, ITrackable
     {
         rb = GetComponent<Rigidbody2D>();
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        // Freeze rotation so projectiles don't spin the enemy
+        rb.freezeRotation = true;
         health = GetComponent<Health>();
         pointsOnDeath = GetComponent<PointsOnDeath>();
     }
@@ -92,10 +104,53 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject, ITrackable
         }
 
         // Calculate direction towards the player
-        Vector2 direction = (playerTransform.position - transform.position).normalized;
+        Vector2 chaseDirection = (playerTransform.position - transform.position).normalized;
 
-        // Set velocity to move towards the player
-        rb.linearVelocity = direction * moveSpeed;
+        // Calculate separation force to avoid stacking with other enemies
+        Vector2 separationForce = CalculateSeparation();
+
+        // Combine chase direction with separation (separation is added, not blended)
+        Vector2 finalDirection = (chaseDirection * moveSpeed) + separationForce;
+        
+        // Set velocity
+        rb.linearVelocity = finalDirection;
+
+        // Rotate to face movement direction (or player if barely moving)
+        Vector2 facingDirection = finalDirection.sqrMagnitude > 0.1f ? finalDirection.normalized : chaseDirection;
+        float angle = Mathf.Atan2(facingDirection.y, facingDirection.x) * Mathf.Rad2Deg - 90f;
+        rb.rotation = angle;
+    }
+
+    /// <summary>
+    /// Calculates a separation force to push away from nearby enemies.
+    /// </summary>
+    private Vector2 CalculateSeparation()
+    {
+        Vector2 separationForce = Vector2.zero;
+        
+        // Find all nearby enemies
+        Collider2D[] nearbyEnemies = Physics2D.OverlapCircleAll(transform.position, separationRadius, enemyLayerMask);
+        
+        foreach (Collider2D enemyCollider in nearbyEnemies)
+        {
+            // Skip self
+            if (enemyCollider.gameObject == gameObject) continue;
+            
+            // Skip non-enemy objects (in case layer mask catches other things)
+            if (!enemyCollider.CompareTag("Enemy")) continue;
+            
+            Vector2 directionAway = (Vector2)transform.position - (Vector2)enemyCollider.transform.position;
+            float distance = directionAway.magnitude;
+            
+            if (distance > 0f && distance < separationRadius)
+            {
+                // Stronger push when closer (inverse relationship)
+                float strength = (separationRadius - distance) / separationRadius;
+                separationForce += directionAway.normalized * strength * separationStrength;
+            }
+        }
+        
+        return separationForce;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
