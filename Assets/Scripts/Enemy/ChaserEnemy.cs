@@ -34,6 +34,11 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject, ITrackable
     private Transform playerTransform;
     private Health health;
     private PointsOnDeath pointsOnDeath;
+    
+    /// <summary>
+    /// If true, this enemy was spawned by a boss and won't count towards wave completion.
+    /// </summary>
+    public bool IsSpawnedByBoss { get; set; }
 
     private void Awake()
     {
@@ -186,8 +191,15 @@ public class ChaserEnemy : MonoBehaviour, IPooledObject, ITrackable
             ScoreManager.Instance.AddScore(pointsOnDeath.GetPoints());
         }
 
-        // Notify the WaveManager that this enemy is defeated.
-        WaveManager.Instance.OnEnemyDefeated();
+        // Only notify WaveManager if this wasn't spawned by a boss
+        // (boss-spawned minions don't count towards wave completion)
+        if (!IsSpawnedByBoss)
+        {
+            WaveManager.Instance.OnEnemyDefeated();
+        }
+
+        // Reset the flag for when this enemy is reused from the pool
+        IsSpawnedByBoss = false;
 
         // Return this object to the pool.
         ObjectPoolManager.Instance.ReturnToPool(PoolTag, gameObject);

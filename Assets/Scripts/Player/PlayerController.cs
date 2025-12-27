@@ -29,6 +29,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject shieldVisual;
     [Tooltip("Enable trail renderer for the player ship")]
     [SerializeField] private bool enableTrail = true;
+    [Tooltip("The normal body GameObject containing the player's body sprite.")]
+    [SerializeField] private GameObject bodyNormal;
+    [Tooltip("The rapid fire body GameObject containing the alternate colored body sprite.")]
+    [SerializeField] private GameObject bodyRapidFire;
     
     [Header("Eye Components")]
     [Tooltip("Reference to the PlayerPupil component that handles aiming.")]
@@ -44,6 +48,7 @@ public class PlayerController : MonoBehaviour
     private TrailRendererController trailController;
 
     private float baseFireRate;
+    private float currentDamageMultiplier = 1f;
     private Coroutine rapidFireCoroutine;
 
     private void OnEnable()
@@ -229,13 +234,21 @@ public class PlayerController : MonoBehaviour
                 {
                     projectile.SetVelocity(direction);
                 }
+                
+                // Apply damage multiplier if active (from rapid fire power-up)
+                DamageDealer damageDealer = projectileGO.GetComponent<DamageDealer>();
+                if (damageDealer != null)
+                {
+                    damageDealer.SetDamageMultiplier(currentDamageMultiplier);
+                }
+                
                 SFX.Play(AudioEvent.PlayerShoot);
                 nextFireTime = Time.time + 1f / fireRate;
             }
         }
     }
 
-    public void ActivateRapidFire(float multiplier, float duration)
+    public void ActivateRapidFire(float fireRateMultiplier, float damageMultiplier, float duration)
     {
         // If a rapid fire power-up is already active, stop the old coroutine.
         if (rapidFireCoroutine != null)
@@ -244,7 +257,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Start a new coroutine for the power-up effect.
-        rapidFireCoroutine = StartCoroutine(RapidFireCoroutine(multiplier, duration));
+        rapidFireCoroutine = StartCoroutine(RapidFireCoroutine(fireRateMultiplier, damageMultiplier, duration));
         SFX.Play(AudioEvent.PowerUpActivate, transform.position);
     }
 
@@ -259,16 +272,31 @@ public class PlayerController : MonoBehaviour
         if (shieldVisual != null) shieldVisual.SetActive(false);
     }
 
-    private System.Collections.IEnumerator RapidFireCoroutine(float multiplier, float duration)
+    private System.Collections.IEnumerator RapidFireCoroutine(float fireRateMultiplier, float damageMultiplier, float duration)
     {
         // Apply the fire rate multiplier.
-        fireRate *= multiplier;
+        fireRate *= fireRateMultiplier;
+        
+        // Apply the damage multiplier.
+        currentDamageMultiplier = damageMultiplier;
+
+        // Swap to rapid fire body visual
+        if (bodyNormal != null) bodyNormal.SetActive(false);
+        if (bodyRapidFire != null) bodyRapidFire.SetActive(true);
 
         // Wait for the specified duration.
         yield return new WaitForSeconds(duration);
 
         // Revert the fire rate to the base value.
         fireRate = baseFireRate;
+        
+        // Revert the damage multiplier.
+        currentDamageMultiplier = 1f;
+
+        // Swap back to normal body visual
+        if (bodyRapidFire != null) bodyRapidFire.SetActive(false);
+        if (bodyNormal != null) bodyNormal.SetActive(true);
+
         rapidFireCoroutine = null;
     }
 

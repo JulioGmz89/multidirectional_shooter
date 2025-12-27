@@ -1,15 +1,27 @@
 using UnityEngine;
 
 /// <summary>
-/// A simple component that stores a damage value.
+/// A simple component that stores a damage value with optional multiplier.
 /// </summary>
 public class DamageDealer : MonoBehaviour
 {
-    [Tooltip("The amount of damage this object deals on collision.")]
-    [SerializeField] private int damage = 1;
+    [Tooltip("The base amount of damage this object deals on collision.")]
+    [SerializeField] private int baseDamage = 1;
+    
+    private float damageMultiplier = 1f;
 
     public int GetDamage()
     {
-        return damage;
+        return Mathf.RoundToInt(baseDamage * damageMultiplier);
+    }
+    
+    public void SetDamageMultiplier(float multiplier)
+    {
+        damageMultiplier = multiplier;
+    }
+    
+    public void ResetDamageMultiplier()
+    {
+        damageMultiplier = 1f;
     }
 }

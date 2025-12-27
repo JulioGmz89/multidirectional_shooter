@@ -25,6 +25,7 @@ public class Health : MonoBehaviour
 
     public int GetCurrentHealth() => currentHealth;
     public int GetMaxHealth() => maxHealth;
+    public bool IsShielded => isShielded;
 
     private void OnEnable()
     {
@@ -43,6 +44,18 @@ public class Health : MonoBehaviour
     {
         isShielded = true;
         OnShieldActivated?.Invoke();
+        SFX.Play(AudioEvent.PowerUpActivate, transform.position);
+    }
+    
+    /// <summary>
+    /// Heals the object by a specified amount, capped at max health.
+    /// </summary>
+    public void Heal(int amount)
+    {
+        if (currentHealth <= 0) return; // Already dead
+        
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
         SFX.Play(AudioEvent.PowerUpActivate, transform.position);
     }
 

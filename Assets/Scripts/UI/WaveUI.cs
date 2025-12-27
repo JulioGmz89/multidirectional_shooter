@@ -1,19 +1,12 @@
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// Manages the wave counter UI, switching between icons and text.
+/// Manages the wave counter UI, displaying the current wave number as text.
 /// </summary>
 public class WaveUI : MonoBehaviour
 {
-    [Header("Icon Display (Waves 1-5)")]
-    [Tooltip("The parent object for the wave icons.")]
-    [SerializeField] private GameObject waveIconContainer;
-    [Tooltip("A list of GameObjects representing the icons for waves 1-5.")]
-    [SerializeField] private List<GameObject> waveIcons;
-
-    [Header("Text Display (Wave 6+)")]
+    [Header("Text Display")]
     [Tooltip("The parent object for the wave text.")]
     [SerializeField] private GameObject waveTextContainer;
     [Tooltip("The TextMeshPro component to display the wave number.")]
@@ -41,23 +34,15 @@ public class WaveUI : MonoBehaviour
 
     private void UpdateWaveDisplay(int currentWave)
     {
-        if (currentWave <= 5)
+        // Ensure text container is active
+        if (waveTextContainer != null)
         {
-            // Use icons for waves 1-5
-            waveIconContainer.SetActive(true);
-            waveTextContainer.SetActive(false);
-
-            for (int i = 0; i < waveIcons.Count; i++)
-            {
-                // Activate icons up to the current wave number (e.g., wave 3 activates icons 0, 1, 2)
-                waveIcons[i].SetActive(i < currentWave);
-            }
-        }
-        else
-        {
-            // Use text for waves 6 and above
-            waveIconContainer.SetActive(false);
             waveTextContainer.SetActive(true);
+        }
+        
+        // Display wave number as text
+        if (waveText != null)
+        {
             waveText.text = currentWave.ToString();
         }
     }

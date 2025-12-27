@@ -23,6 +23,9 @@ public class PowerUp : MonoBehaviour, ITrackable
     [Header("Rapid Fire Settings")]
     [Tooltip("The multiplier to apply to the player's fire rate.")]
     [SerializeField] private float fireRateMultiplier = 2f;
+    
+    [Tooltip("The multiplier to apply to the player's damage.")]
+    [SerializeField] private float damageMultiplier = 2f;
 
     #region ITrackable Implementation
     public Transform TrackableTransform => transform;
@@ -66,10 +69,19 @@ public class PowerUp : MonoBehaviour, ITrackable
                 switch (powerUpType)
                 {
                     case PowerUpType.RapidFire:
-                        playerController.ActivateRapidFire(fireRateMultiplier, duration);
+                        playerController.ActivateRapidFire(fireRateMultiplier, damageMultiplier, duration);
                         break;
                     case PowerUpType.Shield:
-                        playerController.ActivateShield();
+                        // If player already has shield, heal 1 HP instead
+                        Health playerHealth = other.GetComponent<Health>();
+                        if (playerHealth != null && playerHealth.IsShielded)
+                        {
+                            playerHealth.Heal(1);
+                        }
+                        else
+                        {
+                            playerController.ActivateShield();
+                        }
                         break;
                 }
 

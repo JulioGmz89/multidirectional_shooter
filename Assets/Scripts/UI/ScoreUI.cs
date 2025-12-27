@@ -32,6 +32,6 @@ public class ScoreUI : MonoBehaviour
     private void UpdateScoreText(int score)
     {
         // Update the text display.
-        scoreText.text = $"Score: {score}";
+        scoreText.text = score.ToString();
     }
 }

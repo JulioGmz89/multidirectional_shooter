@@ -96,9 +96,8 @@ public class HealthUI : MonoBehaviour
 
     private void HandleHealthChanged(int currentHealth, int maxHealth)
     {
-        if (isShielded) return; // Don't update colors if shield is active
-
-        Color activeColor = GetHealthColor(currentHealth, maxHealth);
+        // Use shield color if active, otherwise use health-based color
+        Color activeColor = isShielded ? shieldActiveColor : GetHealthColor(currentHealth, maxHealth);
         UpdateBarColors(activeColor);
     }
 
